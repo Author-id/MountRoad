@@ -95,7 +95,7 @@ def lvl_completed():  # уровень пройден
         pygame.display.flip()
 
 
-def game_over():  # игра завершена
+def game_over():  # смерть игрока
     pass
 
 
