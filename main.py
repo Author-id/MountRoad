@@ -179,7 +179,7 @@ class Hero(pygame.sprite.Sprite):  # игрок
 
 
 BACKGROUND = pygame.transform.scale(load_image("background.png"), (WIDTH, HEIGHT))
-game_over()
+start_screen()
 if __name__ == '__main__':
     running = True
     # генерация уровня
