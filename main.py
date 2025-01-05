@@ -112,6 +112,20 @@ def game_over():  # смерть игрока
     screen.blit(replay, (WIDTH // 2 - replay.get_width() // 2, 250))
     screen.blit(to_menu, (WIDTH // 2 - to_menu.get_width() // 2, 350))
 
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                # звучит музыка поражения
+                # ...
+                global time_start
+                time_start = time.time()
+                return
+        clock.tick(FPS)
+        pygame.display.flip()
+
 
 def finish_screen():  # конечный экран
     # звучит триумфальная музыка
@@ -124,6 +138,14 @@ def finish_screen():  # конечный экран
     passing = small_game.render("You've passed the game!", True, BLACK)
     screen.blit(pass_game, (WIDTH // 2 - pass_game.get_width() // 2, HEIGHT // 2 - 140))
     screen.blit(passing, (WIDTH // 2 - passing.get_width() // 2, HEIGHT // 2 - 70))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        clock.tick(FPS)
+        pygame.display.flip()
 
 
 class Tile(pygame.sprite.Sprite):  # блоки
@@ -157,7 +179,7 @@ class Hero(pygame.sprite.Sprite):  # игрок
 
 
 BACKGROUND = pygame.transform.scale(load_image("background.png"), (WIDTH, HEIGHT))
-start_screen()
+game_over()
 if __name__ == '__main__':
     running = True
     # генерация уровня
