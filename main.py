@@ -10,6 +10,8 @@ TILE_SIZE = 64
 WIDTH = 1344
 HEIGHT = 11 * TILE_SIZE
 MAX_LVL = 2
+BLACK = pygame.Color('black')
+DARK_GREY = (40, 40, 40)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Mountains")
@@ -96,11 +98,28 @@ def lvl_completed():  # уровень пройден
 
 
 def game_over():  # смерть игрока
-    pass
+    # звучит музыка поражения
+    # ...
+    fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    press_font = pygame.font.Font(None, 50)
+    lost = pygame.font.Font(None, 100)
+    main_txt = lost.render('You lost', True, BLACK)
+    replay = press_font.render('Press 1 if you want to restart this level', True, DARK_GREY)
+    to_menu = press_font.render('Press 2 if you want to go to menu', True, DARK_GREY)
+    screen.blit(main_txt, (WIDTH // 2 - main_txt.get_width() // 2, 100))
+    screen.blit(replay, (WIDTH // 2 - replay.get_width() // 2, 250))
+    screen.blit(to_menu, (WIDTH // 2 - to_menu.get_width() // 2, 350))
 
 
 def finish_screen():  # конечный экран
-    pass
+    # звучит триумфальная музыка
+    # ...
+    fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    game = pygame.font.Font(None, 90)
+    pass_game = game.render("Congratulations, you've passed the game!", True, BLACK)
+    screen.blit(pass_game, (WIDTH // 2 - pass_game.get_width() // 2, HEIGHT // 2 - 80))
 
 
 class Tile(pygame.sprite.Sprite):  # блоки
@@ -144,4 +163,3 @@ if __name__ == '__main__':
         clock.tick(FPS)
         pygame.display.flip()
     pygame.quit()
-
