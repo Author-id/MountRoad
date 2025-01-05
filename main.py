@@ -1,8 +1,7 @@
+import pygame
 import os
 import sys
 import time
-
-import pygame
 
 pygame.init()
 
@@ -43,6 +42,36 @@ def load_image(name, directory=None, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
+
+def load_level(filename):  # загрузка карты
+    filename = "Levels/" + filename
+    with open(filename, 'r', encoding="UTF-8") as lvlFile:
+        level_map = [line.strip() for line in lvlFile]
+    return level_map
+
+
+def create_level(level):  # создание уровня
+    global player
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            if level[y][x] == "&":
+                player = Hero(x, y)
+            elif level[y][x] == "t":
+                Spike(x, y)
+            elif level[y][x] == "f":
+                Flag(x, y)
+            elif level[y][x] != ".":
+                Tile(level[y][x], x, y)
+
+
+def level_up():  # новый уровень
+    global lvl
+    lvl += 1
+    for sprite in all_sprites:
+        sprite.kill()
+    create_level(load_level(f"lvl{lvl}.txt"))
+    return
 
 
 def start_screen():  # начальный экран
@@ -120,6 +149,9 @@ def game_over():  # смерть игрока
             if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                 # звучит музыка поражения
                 # ...
+                for sprite in all_sprites:
+                    sprite.kill()
+                create_level(load_level(f"lvl{lvl}.txt"))
                 global time_start
                 time_start = time.time()
                 return
@@ -142,6 +174,8 @@ def finish_screen():  # конечный экран
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                for sprite in all_sprites:
+                    sprite.kill()
                 pygame.quit()
                 sys.exit()
         clock.tick(FPS)
@@ -151,26 +185,43 @@ def finish_screen():  # конечный экран
 class Tile(pygame.sprite.Sprite):  # блоки
     def __init__(self, tile_type, x, y):
         super().__init__(tiles_group, all_sprites)
-        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset"), (TILE_SIZE, TILE_SIZE))
-        self.rect = self.image.get_rect().move(TILE_SIZE * x, TILE_SIZE * y)
+        self.size_x = 64
+        self.size_y = 64
+        if tile_type == "g":
+            self.size_x = TILE_SIZE
+            self.size_y = 16
+        elif tile_type == "h":
+            self.size_x = 16
+            self.size_y = TILE_SIZE
+        elif tile_type == "s":
+            self.size_x = 32
+            self.size_y = 32
+        elif tile_type == "w":
+            self.size_x = TILE_SIZE * 2
+            self.size_y = 32
+        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset"), (self.size_x, self.size_y))
+        if self.size_y != TILE_SIZE:
+            self.rect = self.image.get_rect().move(TILE_SIZE * x, (TILE_SIZE * y) + self.size_y)
+        else:
+            self.rect = self.image.get_rect().move(TILE_SIZE * x, TILE_SIZE * y)
 
 
 class Spike(pygame.sprite.Sprite):  # шипы
     def __init__(self, x, y):
         super().__init__(spikes_group, all_sprites)
-        self.image = load_image("spike.png")
+        self.image = pygame.transform.scale(load_image("t.png"), (TILE_SIZE, TILE_SIZE // 2))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
-        self.rect.left = x * TILE_SIZE + 5
+        self.rect.left = x * TILE_SIZE
 
 
 class Flag(pygame.sprite.Sprite):  # финишный флаг
     def __init__(self, x, y):
         super().__init__(flag_group, all_sprites)
-        self.image = pygame.transform.scale(load_image("flag.png"), (50, TILE_SIZE))
+        self.image = pygame.transform.scale(load_image("f.png"), (50, TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
-        self.rect.left = x * TILE_SIZE + TILE_SIZE // 2
+        self.rect.left = x * TILE_SIZE + TILE_SIZE // 2 - self.rect.width // 2
 
 
 class Hero(pygame.sprite.Sprite):  # игрок
@@ -182,8 +233,7 @@ BACKGROUND = pygame.transform.scale(load_image("background.png"), (WIDTH, HEIGHT
 start_screen()
 if __name__ == '__main__':
     running = True
-    # генерация уровня
-    # ...
+    create_level(load_level(f'lvl{lvl}.txt'))
     time_start = time.time()  # начало
     while running:
         for event in pygame.event.get():
@@ -195,6 +245,10 @@ if __name__ == '__main__':
         seconds = u'%.2f' % ((time_now - time_start) % 60)
         time_font = pygame.font.Font(None, 30)
         time_txt = time_font.render(f"{minutes}.{seconds}", True, (0, 0, 0))
+        tiles_group.draw(screen)
+        spikes_group.draw(screen)
+        heroes_group.draw(screen)
+        flag_group.draw(screen)
         screen.blit(time_txt, (10, 5))
         clock.tick(FPS)
         pygame.display.flip()
