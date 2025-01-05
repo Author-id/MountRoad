@@ -1,7 +1,8 @@
-import pygame
-import sys
 import os
+import sys
 import time
+
+import pygame
 
 pygame.init()
 
@@ -117,9 +118,12 @@ def finish_screen():  # конечный экран
     # ...
     fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    game = pygame.font.Font(None, 90)
-    pass_game = game.render("Congratulations, you've passed the game!", True, BLACK)
-    screen.blit(pass_game, (WIDTH // 2 - pass_game.get_width() // 2, HEIGHT // 2 - 80))
+    game = pygame.font.Font(None, 100)
+    small_game = pygame.font.Font(None, 50)
+    pass_game = game.render("Congratulations!", True, BLACK)
+    passing = small_game.render("You've passed the game!", True, BLACK)
+    screen.blit(pass_game, (WIDTH // 2 - pass_game.get_width() // 2, HEIGHT // 2 - 140))
+    screen.blit(passing, (WIDTH // 2 - passing.get_width() // 2, HEIGHT // 2 - 70))
 
 
 class Tile(pygame.sprite.Sprite):  # блоки
