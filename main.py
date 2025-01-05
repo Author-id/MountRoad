@@ -129,16 +129,26 @@ def finish_screen():  # конечный экран
 class Tile(pygame.sprite.Sprite):  # блоки
     def __init__(self, tile_type, x, y):
         super().__init__(tiles_group, all_sprites)
+        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset"), (TILE_SIZE, TILE_SIZE))
+        self.rect = self.image.get_rect().move(TILE_SIZE * x, TILE_SIZE * y)
 
 
 class Spike(pygame.sprite.Sprite):  # шипы
     def __init__(self, x, y):
         super().__init__(spikes_group, all_sprites)
+        self.image = load_image("spike.png")
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.rect.left = x * TILE_SIZE + 5
 
 
 class Flag(pygame.sprite.Sprite):  # финишный флаг
     def __init__(self, x, y):
         super().__init__(flag_group, all_sprites)
+        self.image = pygame.transform.scale(load_image("flag.png"), (50, TILE_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.rect.left = x * TILE_SIZE + TILE_SIZE // 2
 
 
 class Hero(pygame.sprite.Sprite):  # игрок
