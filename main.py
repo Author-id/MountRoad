@@ -6,9 +6,9 @@ import time
 pygame.init()
 
 FPS = 60
-TILE_SIZE = 64
-WIDTH = 1344
-HEIGHT = 11 * TILE_SIZE
+TILE_SIZE = 60
+WIDTH = 1320
+HEIGHT = 12 * TILE_SIZE
 MAX_LVL = 2
 BLACK = pygame.Color('black')
 DARK_GREY = (40, 40, 40)
@@ -183,45 +183,51 @@ def finish_screen():  # конечный экран
 class Tile(pygame.sprite.Sprite):  # блоки
     def __init__(self, tile_type, x, y):
         super().__init__(tiles_group, all_sprites)
-        self.size_x = 64
-        self.size_y = 64
+        self.size_x = TILE_SIZE
+        self.size_y = TILE_SIZE
         if tile_type == "g":
             self.size_x = TILE_SIZE
-            self.size_y = 16
+            self.size_y = 15
+        elif tile_type == "n":
+            self.size_x = 15
+            self.size_y = TILE_SIZE
+        elif tile_type == "m":
+            self.size_x = 15
+            self.size_y = TILE_SIZE
         elif tile_type == "h":
-            self.size_x = 32
+            self.size_x = 30
             self.size_y = TILE_SIZE * 2
         elif tile_type == "s":
-            self.size_x = 48
-            self.size_y = 48
+            self.size_x = 40
+            self.size_y = 40
         elif tile_type == "w":
             self.size_x = TILE_SIZE * 2
-            self.size_y = 32
+            self.size_y = 35
         elif tile_type == "1":
             self.size_x = TILE_SIZE * 2
             self.size_y = TILE_SIZE
         self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset", -1), (self.size_x, self.size_y))
         if tile_type in ("g", "s"):
-            self.rect = self.image.get_rect().move(TILE_SIZE * x, (TILE_SIZE * (y+1)) - self.size_y)
+            self.rect = self.image.get_rect().move(TILE_SIZE * x, ((TILE_SIZE * (y+1)) - self.size_y) + 45)
         else:
-            self.rect = self.image.get_rect().move(TILE_SIZE * x, TILE_SIZE * y)
+            self.rect = self.image.get_rect().move(TILE_SIZE * x, (TILE_SIZE * y) + 45)
 
 
 class Spike(pygame.sprite.Sprite):  # шипы
     def __init__(self, x, y):
         super().__init__(spikes_group, all_sprites)
-        self.image = pygame.transform.scale(load_image("t.png"), (TILE_SIZE, 48))
+        self.image = pygame.transform.scale(load_image("t.png"), (TILE_SIZE, 35))
         self.rect = self.image.get_rect()
-        self.rect.bottom = (y + 1) * TILE_SIZE + 2
+        self.rect.bottom = (y + 1) * TILE_SIZE + 47
         self.rect.left = x * TILE_SIZE
 
 
 class Flag(pygame.sprite.Sprite):  # финишный флаг
     def __init__(self, x, y):
         super().__init__(flag_group, all_sprites)
-        self.image = pygame.transform.scale(load_image("f.png"), (50, TILE_SIZE))
+        self.image = pygame.transform.scale(load_image("f.png"), (40, TILE_SIZE))
         self.rect = self.image.get_rect()
-        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.rect.bottom = ((y + 1) * TILE_SIZE) + 45
         self.rect.left = x * TILE_SIZE
 
 
