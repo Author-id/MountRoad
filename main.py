@@ -81,9 +81,9 @@ def start_screen():  # начальный экран
     screen.blit(fon, (0, 0))
     press_font = pygame.font.Font(None, 25)
     main_font = pygame.font.Font(None, 100)
-    press_txt = press_font.render('press any button', True, (40, 40, 40))
+    press_txt = press_font.render('press any button', True, DARK_GREY)
     screen.blit(press_txt, (WIDTH // 2 - press_txt.get_width() // 2, 170))
-    main_txt = main_font.render('Mountains', True, (0, 0, 0))
+    main_txt = main_font.render('Mountains', True, BLACK)
     screen.blit(main_txt, (WIDTH // 2 - main_txt.get_width() // 2, 100))
 
     while True:
@@ -103,13 +103,13 @@ def lvl_completed():  # уровень пройден
     # музыка победы
     all_sprites.draw(screen)
     completed = pygame.font.Font(None, 100)
-    c_text = completed.render(f'Level {lvl} completed', True, (0, 0, 0))
+    c_text = completed.render(f'Level {lvl} completed', True, BLACK)
     screen.blit(c_text, (WIDTH // 2 - c_text.get_width() // 2, HEIGHT // 2 - c_text.get_height() // 2))
     pressed = pygame.font.Font(None, 25)
-    p_text = pressed.render('press any button', True, (0, 0, 0))
+    p_text = pressed.render('press any button', True, DARK_GREY)
     screen.blit(p_text, (WIDTH // 2 - p_text.get_width() // 2, 410))
     times = pygame.font.Font(None, 40)
-    t_text = times.render(f"Your time: {minutes}.{seconds}", True, (0, 0, 0))
+    t_text = times.render(f"Your time: {minutes}.{seconds}", True, DARK_GREY)
     screen.blit(t_text, (WIDTH // 2 - t_text.get_width() // 2, 500))
 
     while True:
@@ -147,8 +147,6 @@ def game_over():  # смерть игрока
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                # звучит музыка поражения
-                # ...
                 for sprite in all_sprites:
                     sprite.kill()
                 create_level(load_level(f"lvl{lvl}.txt"))
@@ -191,17 +189,20 @@ class Tile(pygame.sprite.Sprite):  # блоки
             self.size_x = TILE_SIZE
             self.size_y = 16
         elif tile_type == "h":
-            self.size_x = 16
-            self.size_y = TILE_SIZE
-        elif tile_type == "s":
             self.size_x = 32
-            self.size_y = 32
+            self.size_y = TILE_SIZE * 2
+        elif tile_type == "s":
+            self.size_x = 48
+            self.size_y = 48
         elif tile_type == "w":
             self.size_x = TILE_SIZE * 2
             self.size_y = 32
-        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset"), (self.size_x, self.size_y))
-        if self.size_y != TILE_SIZE:
-            self.rect = self.image.get_rect().move(TILE_SIZE * x, (TILE_SIZE * y) + self.size_y)
+        elif tile_type == "1":
+            self.size_x = TILE_SIZE * 2
+            self.size_y = TILE_SIZE
+        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset", -1), (self.size_x, self.size_y))
+        if tile_type in ("g", "s"):
+            self.rect = self.image.get_rect().move(TILE_SIZE * x, (TILE_SIZE * (y+1)) - self.size_y)
         else:
             self.rect = self.image.get_rect().move(TILE_SIZE * x, TILE_SIZE * y)
 
@@ -209,9 +210,9 @@ class Tile(pygame.sprite.Sprite):  # блоки
 class Spike(pygame.sprite.Sprite):  # шипы
     def __init__(self, x, y):
         super().__init__(spikes_group, all_sprites)
-        self.image = pygame.transform.scale(load_image("t.png"), (TILE_SIZE, TILE_SIZE // 2))
+        self.image = pygame.transform.scale(load_image("t.png"), (TILE_SIZE, 48))
         self.rect = self.image.get_rect()
-        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.rect.bottom = (y + 1) * TILE_SIZE + 2
         self.rect.left = x * TILE_SIZE
 
 
@@ -221,7 +222,7 @@ class Flag(pygame.sprite.Sprite):  # финишный флаг
         self.image = pygame.transform.scale(load_image("f.png"), (50, TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
-        self.rect.left = x * TILE_SIZE + TILE_SIZE // 2 - self.rect.width // 2
+        self.rect.left = x * TILE_SIZE
 
 
 class Hero(pygame.sprite.Sprite):  # игрок
