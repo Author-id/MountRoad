@@ -6,9 +6,9 @@ import time
 pygame.init()
 
 FPS = 60
-TILE_SIZE = 64
-WIDTH = 1280
-HEIGHT = 11 * TILE_SIZE
+TILE_SIZE = 60
+WIDTH = 1320
+HEIGHT = 12 * TILE_SIZE
 MAX_LVL = 2
 BLACK = pygame.Color('black')
 DARK_GREY = (40, 40, 40)
@@ -18,12 +18,19 @@ pygame.display.set_caption("Mountains")
 lvl = 1
 clock = pygame.time.Clock()
 
+sign_group = pygame.sprite.Group()
+bonfire_group = pygame.sprite.Group()
+bash_group = pygame.sprite.Group()
 tree_group = pygame.sprite.Group()
-heroes_group = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
-spikes_group = pygame.sprite.Group()
+stone_group = pygame.sprite.Group()
+house_group = pygame.sprite.Group()
+hero_group = pygame.sprite.Group()
+tile_group = pygame.sprite.Group()
+spike_group = pygame.sprite.Group()
 flag_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
+group_lst = [tree_group, stone_group, house_group, sign_group,
+             tile_group, spike_group, flag_group, bash_group]
 
 
 def load_image(name, directory=None, colorkey=None):
@@ -60,6 +67,16 @@ def create_level(level):  # создание уровня
                 player = Hero(x, y)
             elif level[y][x] == "f":
                 Flag(x, y)
+            elif level[y][x] == "@":
+                House(x, y)
+            elif level[y][x] in "yо":
+                Sign(level[y][x], x, y)
+            elif level[y][x] in "йёк":
+                Stone(level[y][x], x, y)
+            elif level[y][x] in "вгджзи":
+                Tree(level[y][x], x, y)
+            elif level[y][x] in "лмн":
+                Bush(level[y][x], x, y)
             elif level[y][x] != ".":
                 Tile(level[y][x], x, y)
 
@@ -78,12 +95,12 @@ def start_screen():  # начальный экран
     # ...
     fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    press_font = pygame.font.Font(None, 25)
+    press_font = pygame.font.Font(None, 30)
     main_font = pygame.font.Font(None, 100)
     press_txt = press_font.render('press any button', True, DARK_GREY)
-    screen.blit(press_txt, (WIDTH // 2 - press_txt.get_width() // 2, 170))
-    main_txt = main_font.render('Mountains', True, BLACK)
-    screen.blit(main_txt, (WIDTH // 2 - main_txt.get_width() // 2, 100))
+    screen.blit(press_txt, (WIDTH // 2 - press_txt.get_width() // 2, 130))
+    main_txt = main_font.render('Village Road', True, DARK_GREY)
+    screen.blit(main_txt, (WIDTH // 2 - main_txt.get_width() // 2, 60))
 
     while True:
         for event in pygame.event.get():
@@ -131,14 +148,14 @@ def game_over():  # смерть игрока
     # ...
     fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    press_font = pygame.font.Font(None, 50)
+    press_font = pygame.font.Font(None, 40)
     lost = pygame.font.Font(None, 100)
-    main_txt = lost.render('You lost', True, BLACK)
+    main_txt = lost.render('Game Over', True, BLACK)
     replay = press_font.render('Press 1 if you want to restart this level', True, DARK_GREY)
     to_menu = press_font.render('Press 2 if you want to go to menu', True, DARK_GREY)
-    screen.blit(main_txt, (WIDTH // 2 - main_txt.get_width() // 2, 100))
-    screen.blit(replay, (WIDTH // 2 - replay.get_width() // 2, 250))
-    screen.blit(to_menu, (WIDTH // 2 - to_menu.get_width() // 2, 350))
+    screen.blit(main_txt, (WIDTH // 2 - main_txt.get_width() // 2, 150))
+    screen.blit(replay, (WIDTH // 2 - replay.get_width() // 2, 220))
+    screen.blit(to_menu, (WIDTH // 2 - to_menu.get_width() // 2, 260))
 
     while True:
         for event in pygame.event.get():
@@ -159,14 +176,14 @@ def game_over():  # смерть игрока
 def finish_screen():  # конечный экран
     # звучит триумфальная музыка
     # ...
-    fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
+    fon = pygame.transform.scale(load_image('finishscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     game = pygame.font.Font(None, 100)
     small_game = pygame.font.Font(None, 50)
     pass_game = game.render("Congratulations!", True, BLACK)
-    passing = small_game.render("You've passed the game!", True, BLACK)
-    screen.blit(pass_game, (WIDTH // 2 - pass_game.get_width() // 2, HEIGHT // 2 - 140))
-    screen.blit(passing, (WIDTH // 2 - passing.get_width() // 2, HEIGHT // 2 - 70))
+    passing = small_game.render("You've passed the game!", True, DARK_GREY)
+    screen.blit(pass_game, (WIDTH // 2 - pass_game.get_width() // 2, HEIGHT // 2 - 200))
+    screen.blit(passing, (WIDTH // 2 - passing.get_width() // 2, HEIGHT // 2 - 130))
 
     while True:
         for event in pygame.event.get():
@@ -179,34 +196,70 @@ def finish_screen():  # конечный экран
         pygame.display.flip()
 
 
-class Tile(pygame.sprite.Sprite):  # блоки
-    def __init__(self, tile_type, x, y):
-        super().__init__(tiles_group, all_sprites)
-        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset"), (TILE_SIZE, TILE_SIZE))
-        self.rect = self.image.get_rect().move(TILE_SIZE * x, TILE_SIZE * y)
+class Sign(pygame.sprite.Sprite):
+    def __init__(self, sign_type, x, y):
+        super().__init__(sign_group, all_sprites)
+        self.image = pygame.transform.scale(load_image(f"{sign_type}.png", "objects/Signs"), (35, 48))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE + 1
+        self.rect.left = x * TILE_SIZE + 10
 
 
-class Tree(pygame.sprite.Sprite):  # шипы
-    def __init__(self, x, y):
-        super().__init__(spikes_group, all_sprites)
-        self.image = pygame.transform.scale(load_image("t.png"), (TILE_SIZE, TILE_SIZE * 3))
+class Bush(pygame.sprite.Sprite):
+    def __init__(self, bash_type, x, y):
+        super().__init__(bash_group, all_sprites)
+        self.image = pygame.transform.scale(load_image(f"{bash_type}.png", "objects/Bushes"), (TILE_SIZE * 3, TILE_SIZE * 2))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
         self.rect.left = x * TILE_SIZE
+
+
+class Tree(pygame.sprite.Sprite):
+    def __init__(self, tree_type, x, y):
+        super().__init__(tree_group, all_sprites)
+        self.image = pygame.transform.scale(load_image(f"{tree_type}.png", "objects/Trees"), (TILE_SIZE * 2, TILE_SIZE * 3))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE + 1
+        self.rect.left = x * TILE_SIZE - 15
+
+
+class Stone(pygame.sprite.Sprite):
+    def __init__(self, stone_type, x, y):
+        super().__init__(stone_group, all_sprites)
+        self.image = pygame.transform.scale(load_image(f"{stone_type}.png", "objects/Stones"), (TILE_SIZE * 2, TILE_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE + 2
+        self.rect.left = x * TILE_SIZE + 10
+
+
+class House(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__(house_group, all_sprites)
+        self.image = pygame.transform.scale(load_image("@.png", "objects"), (TILE_SIZE * 3, TILE_SIZE * 3))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE + 1
+        self.rect.left = x * TILE_SIZE
+
+
+class Tile(pygame.sprite.Sprite):  # блоки
+    def __init__(self, tile_type, x, y):
+        super().__init__(tile_group, all_sprites)
+        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset"), (TILE_SIZE, TILE_SIZE))
+        self.rect = self.image.get_rect().move(TILE_SIZE * x, TILE_SIZE * y)
 
 
 class Flag(pygame.sprite.Sprite):  # финишный флаг
     def __init__(self, x, y):
         super().__init__(flag_group, all_sprites)
-        self.image = pygame.transform.scale(load_image("f.png"), (48, TILE_SIZE))
+        self.image = pygame.transform.scale(load_image("f.png", "objects"), (48, TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
-        self.rect.left = x * TILE_SIZE
+        self.rect.left = x * TILE_SIZE + 10
 
 
-class Hero(pygame.sprite.Sprite):  # игрок
+class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        super().__init__(heroes_group, all_sprites)
+        super().__init__(hero_group, all_sprites)
 
 
 BACKGROUND = pygame.transform.scale(load_image("background.png"), (WIDTH, HEIGHT))
@@ -225,10 +278,8 @@ if __name__ == '__main__':
         seconds = u'%.2f' % ((time_now - time_start) % 60)
         time_font = pygame.font.Font(None, 30)
         time_txt = time_font.render(f"{minutes}.{seconds}", True, (0, 0, 0))
-        tiles_group.draw(screen)
-        spikes_group.draw(screen)
-        heroes_group.draw(screen)
-        flag_group.draw(screen)
+        for group in group_lst:
+            group.draw(screen)
         screen.blit(time_txt, (10, 5))
         clock.tick(FPS)
         pygame.display.flip()
