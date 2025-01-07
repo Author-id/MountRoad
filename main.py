@@ -99,8 +99,8 @@ def start_screen():  # начальный экран
     main_font = pygame.font.Font(None, 100)
     press_txt = press_font.render('press any button', True, DARK_GREY)
     screen.blit(press_txt, (WIDTH // 2 - press_txt.get_width() // 2, 130))
-    main_txt = main_font.render('Village Road', True, DARK_GREY)
-    screen.blit(main_txt, (WIDTH // 2 - main_txt.get_width() // 2, 60))
+    main_txt = main_font.render('Mount Road', True, DARK_GREY)
+    screen.blit(main_txt, (WIDTH // 2 - main_txt.get_width() // 2, 70))
 
     while True:
         for event in pygame.event.get():
@@ -220,7 +220,7 @@ class Tree(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(load_image(f"{tree_type}.png", "objects/Trees"), (TILE_SIZE * 2, TILE_SIZE * 3))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE + 1
-        self.rect.left = x * TILE_SIZE - 15
+        self.rect.left = x * TILE_SIZE - 18
 
 
 class Stone(pygame.sprite.Sprite):
@@ -262,7 +262,7 @@ class Hero(pygame.sprite.Sprite):
         super().__init__(hero_group, all_sprites)
 
 
-BACKGROUND = pygame.transform.scale(load_image("background.png"), (WIDTH, HEIGHT))
+BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
 start_screen()
 if __name__ == '__main__':
     running = True
