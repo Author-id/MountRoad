@@ -75,7 +75,7 @@ def create_level(level):  # создание уровня
                 Stone(level[y][x], x, y)
             elif level[y][x] in "вгджзи":
                 Tree(level[y][x], x, y)
-            elif level[y][x] in "лмн":
+            elif level[y][x] in "лмнп":
                 Bush(level[y][x], x, y)
             elif level[y][x] != ".":
                 Tile(level[y][x], x, y)
@@ -208,10 +208,15 @@ class Sign(pygame.sprite.Sprite):
 class Bush(pygame.sprite.Sprite):
     def __init__(self, bash_type, x, y):
         super().__init__(bash_group, all_sprites)
-        self.image = pygame.transform.scale(load_image(f"{bash_type}.png", "objects/Bushes"), (TILE_SIZE * 3, TILE_SIZE * 2))
+        self.size_x = TILE_SIZE * 3
+        self.size_y = TILE_SIZE * 2
+        if bash_type == "п":
+            self.size_x = TILE_SIZE * 1.5
+            self.size_y = 32
+        self.image = pygame.transform.scale(load_image(f"{bash_type}.png", "objects/Bushes"), (self.size_x, self.size_y))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
-        self.rect.left = x * TILE_SIZE
+        self.rect.left = x * TILE_SIZE + 3
 
 
 class Tree(pygame.sprite.Sprite):
@@ -220,7 +225,11 @@ class Tree(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(load_image(f"{tree_type}.png", "objects/Trees"), (TILE_SIZE * 2, TILE_SIZE * 3))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE + 1
-        self.rect.left = x * TILE_SIZE - 18
+        self.rect.left = x * TILE_SIZE
+        if tree_type == "д":
+            self.rect.left -= 35
+        else:
+            self.rect.left -= 18
 
 
 class Stone(pygame.sprite.Sprite):
