@@ -30,7 +30,7 @@ spike_group = pygame.sprite.Group()
 flag_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 group_lst = [tree_group, stone_group, house_group, sign_group,
-             tile_group, spike_group, flag_group, bash_group, hero_group]
+             tile_group, spike_group, flag_group, bash_group]
 
 
 def load_image(name, directory=None, colorkey=None):
@@ -65,7 +65,6 @@ def create_level(level):  # создание уровня
         for x in range(len(level[y])):
             if level[y][x] == "&":
                 player = Hero(x, y)
-                player
             elif level[y][x] == "f":
                 Flag(x, y)
             elif level[y][x] == "@":
@@ -275,7 +274,7 @@ class Flag(pygame.sprite.Sprite):  # финишный флаг
 class Spike(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(spike_group, all_sprites)
-        self.image = pygame.transform.scale(load_image('spike.png', 'objects/spikes'), (TILE_SIZE, TILE_SIZE))
+        self.image = pygame.transform.scale(load_image('spike_3.png', 'objects/spikes'), (TILE_SIZE, TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
         self.rect.left = x * TILE_SIZE
