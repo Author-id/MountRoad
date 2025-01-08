@@ -30,7 +30,7 @@ spike_group = pygame.sprite.Group()
 flag_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 group_lst = [tree_group, stone_group, house_group, sign_group,
-             tile_group, spike_group, flag_group, bash_group]
+             tile_group, spike_group, flag_group, bash_group, hero_group]
 
 
 def load_image(name, directory=None, colorkey=None):
@@ -65,6 +65,7 @@ def create_level(level):  # создание уровня
         for x in range(len(level[y])):
             if level[y][x] == "&":
                 player = Hero(x, y)
+                player
             elif level[y][x] == "f":
                 Flag(x, y)
             elif level[y][x] == "@":
@@ -77,6 +78,8 @@ def create_level(level):  # создание уровня
                 Tree(level[y][x], x, y)
             elif level[y][x] in "лмнп":
                 Bush(level[y][x], x, y)
+            elif level[y][x] == 'ш':
+                Spike(x, y)
             elif level[y][x] != ".":
                 Tile(level[y][x], x, y)
 
@@ -213,7 +216,8 @@ class Bush(pygame.sprite.Sprite):
         if bash_type == "п":
             self.size_x = TILE_SIZE * 1.5
             self.size_y = 32
-        self.image = pygame.transform.scale(load_image(f"{bash_type}.png", "objects/Bushes"), (self.size_x, self.size_y))
+        self.image = pygame.transform.scale(load_image(f"{bash_type}.png", "objects/Bushes"),
+                                            (self.size_x, self.size_y))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
         self.rect.left = x * TILE_SIZE + 3
@@ -222,7 +226,8 @@ class Bush(pygame.sprite.Sprite):
 class Tree(pygame.sprite.Sprite):
     def __init__(self, tree_type, x, y):
         super().__init__(tree_group, all_sprites)
-        self.image = pygame.transform.scale(load_image(f"{tree_type}.png", "objects/Trees"), (TILE_SIZE * 2, TILE_SIZE * 3))
+        self.image = pygame.transform.scale(load_image(f"{tree_type}.png", "objects/Trees"),
+                                            (TILE_SIZE * 2, TILE_SIZE * 3))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE + 1
         self.rect.left = x * TILE_SIZE
@@ -235,7 +240,8 @@ class Tree(pygame.sprite.Sprite):
 class Stone(pygame.sprite.Sprite):
     def __init__(self, stone_type, x, y):
         super().__init__(stone_group, all_sprites)
-        self.image = pygame.transform.scale(load_image(f"{stone_type}.png", "objects/Stones"), (TILE_SIZE * 2, TILE_SIZE))
+        self.image = pygame.transform.scale(load_image(f"{stone_type}.png", "objects/Stones"),
+                                            (TILE_SIZE * 2, TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE + 2
         self.rect.left = x * TILE_SIZE + 10
@@ -266,9 +272,22 @@ class Flag(pygame.sprite.Sprite):  # финишный флаг
         self.rect.left = x * TILE_SIZE + 10
 
 
+class Spike(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__(spike_group, all_sprites)
+        self.image = pygame.transform.scale(load_image('spike.png', 'objects/spikes'), (TILE_SIZE, TILE_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.rect.left = x * TILE_SIZE
+
+
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
+        self.image = pygame.transform.scale(load_image('Hero.png', 'hero'), (TILE_SIZE, TILE_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.rect.left = x * TILE_SIZE
 
 
 BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
