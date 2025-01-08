@@ -249,7 +249,8 @@ class Stone(pygame.sprite.Sprite):
 class House(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(house_group, all_sprites)
-        self.image = pygame.transform.scale(load_image("@.png", "objects"), (TILE_SIZE * 3, TILE_SIZE * 3))
+        self.image = pygame.transform.scale(load_image("@.png", "objects"),
+                                            (TILE_SIZE * 3, TILE_SIZE * 3))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE + 1
         self.rect.left = x * TILE_SIZE
@@ -258,7 +259,8 @@ class House(pygame.sprite.Sprite):
 class Tile(pygame.sprite.Sprite):  # блоки
     def __init__(self, tile_type, x, y):
         super().__init__(tile_group, all_sprites)
-        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset"), (TILE_SIZE, TILE_SIZE))
+        self.image = pygame.transform.scale(load_image(f"{tile_type}.png", "tileset"),
+                                            (TILE_SIZE, TILE_SIZE))
         self.rect = self.image.get_rect().move(TILE_SIZE * x, TILE_SIZE * y)
 
 
@@ -274,7 +276,8 @@ class Flag(pygame.sprite.Sprite):  # финишный флаг
 class Spike(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(spike_group, all_sprites)
-        self.image = pygame.transform.scale(load_image('spike_3.png', 'objects/spikes'), (TILE_SIZE, TILE_SIZE))
+        self.image = pygame.transform.scale(load_image('spike_3.png', 'objects/spikes'),
+                                            (TILE_SIZE, TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
         self.rect.left = x * TILE_SIZE
@@ -283,11 +286,37 @@ class Spike(pygame.sprite.Sprite):
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
-        self.image = pygame.transform.scale(load_image('hero.png', 'hero'),
+        self.img_name = "hero.png"
+        self.image = pygame.transform.scale(load_image(self.img_name, 'hero'),
                                             (TILE_SIZE * 1.5, TILE_SIZE * 1.5))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
         self.rect.left = x * TILE_SIZE
+
+        self.idle_state = []
+        self.idle_count = 0
+        for i in range(1, 5):
+            self.idle_state.append(load_image(f"idle{i}.png", "hero/idle"))
+        self.img_name = self.idle_state[self.idle_count]
+
+    def get_state(self, buttons):
+        keys = pygame.key.get_pressed()
+        states = ["idle"]
+        if buttons["space"]:
+            states.append("jump")
+        elif keys[pygame.K_RIGHT]:
+            states.append("right")
+        elif keys[pygame.K_LEFT]:
+            states.append("left")
+        return states
+
+    def update(self, buttons):
+        curr_state = self.get_state(buttons)
+        if "idle" in curr_state:
+            if self.idle_count < 4:
+                self.idle_count += 1
+            else:
+                self.idle_count = 0
 
 
 BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
@@ -297,15 +326,20 @@ if __name__ == '__main__':
     create_level(load_level(f'lvl{lvl}.txt'))
     time_start = time.time()  # начало
     while running:
+        keys = {"space": False}
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    keys["space"] = True
         screen.blit(BACKGROUND, (0, 0))
         time_now = time.time()
         minutes = str(int((time_now - time_start) // 60))
         seconds = u'%.2f' % ((time_now - time_start) % 60)
         time_font = pygame.font.Font(None, 30)
         time_txt = time_font.render(f"{minutes}.{seconds}", True, (0, 0, 0))
+        hero_group.update(keys)
         for group in group_lst:
             group.draw(screen)
         screen.blit(time_txt, (10, 5))
