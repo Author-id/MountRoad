@@ -20,8 +20,9 @@ lvl = 1
 player = None
 clock = pygame.time.Clock()
 
+start_sound = pygame.mixer.Sound("data/sounds/start.wav")
+main_sound = pygame.mixer.Sound("data/sounds/main.wav")
 lvl_completed_sound = pygame.mixer.Sound("data/sounds/lvl_completed.wav")
-game_sound = pygame.mixer.Sound("data/sounds/game.wav")
 jump_sound = pygame.mixer.Sound("data/sounds/jump.wav")
 game_over_sound = pygame.mixer.Sound("data/sounds/game_over.mp3")
 finish_sound = pygame.mixer.Sound("data/sounds/finish.wav")
@@ -102,7 +103,8 @@ def level_up():  # новый уровень
 
 
 def start_screen():  # начальный экран
-    game_sound.play()
+    start_sound.play(-1)
+    start_sound.set_volume(0.5)
     fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     press_font = pygame.font.Font(None, 30)
@@ -118,8 +120,9 @@ def start_screen():  # начальный экран
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                # игровая музыка
-                # ...
+                start_sound.stop()
+                main_sound.play(-1)
+                main_sound.set_volume(0.15)
                 return
         clock.tick(FPS)
         pygame.display.flip()
@@ -127,6 +130,7 @@ def start_screen():  # начальный экран
 
 def lvl_completed():  # уровень пройден
     lvl_completed_sound.play()
+    lvl_completed_sound.set_volume(0.15)
     all_sprites.draw(screen)
     completed = pygame.font.Font(None, 100)
     c_text = completed.render(f'Level {lvl} completed', True, BLACK)
@@ -154,7 +158,8 @@ def lvl_completed():  # уровень пройден
 
 
 def game_over():  # смерть игрока
-    game_sound.play()
+    game_over_sound.play()
+    game_over_sound.set_volume(0.15)
     fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     press_font = pygame.font.Font(None, 40)
@@ -184,6 +189,7 @@ def game_over():  # смерть игрока
 
 def finish_screen():  # конечный экран
     finish_sound.play()
+    finish_sound.set_volume(0.15)
     fon = pygame.transform.scale(load_image('finishscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     game = pygame.font.Font(None, 100)
