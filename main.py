@@ -30,7 +30,7 @@ spike_group = pygame.sprite.Group()
 flag_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 group_lst = [tree_group, stone_group, house_group, sign_group,
-             tile_group, spike_group, flag_group, bash_group]
+             tile_group, spike_group, flag_group, bash_group, hero_group]
 
 
 def load_image(name, directory=None, colorkey=None):
@@ -283,7 +283,8 @@ class Spike(pygame.sprite.Sprite):
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
-        self.image = pygame.transform.scale(load_image('Hero.png', 'hero'), (TILE_SIZE, TILE_SIZE))
+        self.image = pygame.transform.scale(load_image('hero.png', 'hero'),
+                                            (TILE_SIZE * 1.5, TILE_SIZE * 1.5))
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
         self.rect.left = x * TILE_SIZE
