@@ -286,18 +286,22 @@ class Spike(pygame.sprite.Sprite):
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
-        self.img_name = "hero.png"
-        self.image = pygame.transform.scale(load_image(self.img_name, 'hero'),
-                                            (TILE_SIZE * 1.5, TILE_SIZE * 1.5))
-        self.rect = self.image.get_rect()
-        self.rect.bottom = (y + 1) * TILE_SIZE
-        self.rect.left = x * TILE_SIZE
 
         self.idle_state = []
         self.idle_count = 0
         for i in range(1, 5):
-            self.idle_state.append(load_image(f"idle{i}.png", "hero/idle"))
+            self.idle_state.append(load_image(f"idle{i}.png", 'hero/idle'))
+
+        self.jump_state = []
+        self.jump_count = 0
+        for i in range(1, 7):
+            self.jump_state.append(load_image(f"jump{i}.png", 'hero/jump'))
+
         self.img_name = self.idle_state[self.idle_count]
+        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE * 1.5, TILE_SIZE * 1.5))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.rect.left = x * TILE_SIZE
 
     def get_state(self, buttons):
         keys = pygame.key.get_pressed()
@@ -317,6 +321,9 @@ class Hero(pygame.sprite.Sprite):
                 self.idle_count += 1
             else:
                 self.idle_count = 0
+            self.img_name = self.idle_state[self.idle_count - 1]
+            self.image = pygame.transform.scale(self.img_name, (TILE_SIZE * 1.5, TILE_SIZE * 1.5))
+            clock.tick(FPS // 6)
 
 
 BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
