@@ -69,6 +69,8 @@ def create_level(level):  # создание уровня
                 Flag(x, y)
             elif level[y][x] == "@":
                 House(x, y)
+            elif level[y][x] == 'ш':
+                Spike(x, y)
             elif level[y][x] in "yо":
                 Sign(level[y][x], x, y)
             elif level[y][x] in "йёк":
@@ -77,8 +79,6 @@ def create_level(level):  # создание уровня
                 Tree(level[y][x], x, y)
             elif level[y][x] in "лмнп":
                 Bush(level[y][x], x, y)
-            elif level[y][x] == 'ш':
-                Spike(x, y)
             elif level[y][x] != ".":
                 Tile(level[y][x], x, y)
 
