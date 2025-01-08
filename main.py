@@ -4,6 +4,7 @@ import sys
 import time
 
 pygame.init()
+pygame.mixer.init()
 
 FPS = 60
 TILE_SIZE = 60
@@ -16,7 +17,14 @@ DARK_GREY = (40, 40, 40)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Mountains")
 lvl = 1
+player = None
 clock = pygame.time.Clock()
+
+lvl_completed_sound = pygame.mixer.Sound("data/sounds/lvl_completed.wav")
+game_sound = pygame.mixer.Sound("data/sounds/game.wav")
+jump_sound = pygame.mixer.Sound("data/sounds/jump.wav")
+game_over_sound = pygame.mixer.Sound("data/sounds/game_over.mp3")
+finish_sound = pygame.mixer.Sound("data/sounds/finish.wav")
 
 sign_group = pygame.sprite.Group()
 bonfire_group = pygame.sprite.Group()
@@ -85,7 +93,8 @@ def create_level(level):  # создание уровня
 
 def level_up():  # новый уровень
     global lvl
-    lvl += 1
+    if lvl != 2:
+        lvl += 1
     for sprite in all_sprites:
         sprite.kill()
     create_level(load_level(f"lvl{lvl}.txt"))
@@ -93,8 +102,7 @@ def level_up():  # новый уровень
 
 
 def start_screen():  # начальный экран
-    # начальная музыка
-    # ...
+    game_sound.play()
     fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     press_font = pygame.font.Font(None, 30)
@@ -118,7 +126,7 @@ def start_screen():  # начальный экран
 
 
 def lvl_completed():  # уровень пройден
-    # музыка победы
+    lvl_completed_sound.play()
     all_sprites.draw(screen)
     completed = pygame.font.Font(None, 100)
     c_text = completed.render(f'Level {lvl} completed', True, BLACK)
@@ -146,8 +154,7 @@ def lvl_completed():  # уровень пройден
 
 
 def game_over():  # смерть игрока
-    # звучит музыка поражения
-    # ...
+    game_sound.play()
     fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     press_font = pygame.font.Font(None, 40)
@@ -176,8 +183,7 @@ def game_over():  # смерть игрока
 
 
 def finish_screen():  # конечный экран
-    # звучит триумфальная музыка
-    # ...
+    finish_sound.play()
     fon = pygame.transform.scale(load_image('finishscreen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     game = pygame.font.Font(None, 100)
@@ -286,37 +292,68 @@ class Spike(pygame.sprite.Sprite):
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
-        self.img_name = "hero.png"
-        self.image = pygame.transform.scale(load_image(self.img_name, 'hero'),
-                                            (TILE_SIZE * 1.5, TILE_SIZE * 1.5))
-        self.rect = self.image.get_rect()
-        self.rect.bottom = (y + 1) * TILE_SIZE
-        self.rect.left = x * TILE_SIZE
 
         self.idle_state = []
         self.idle_count = 0
         for i in range(1, 5):
-            self.idle_state.append(load_image(f"idle{i}.png", "hero/idle"))
+            self.idle_state.append(load_image(f"idle{i}.png", 'hero/idle'))
+
+        self.jump_state = []
+        self.jump_count = 0
+        for i in range(1, 7):
+            self.jump_state.append(load_image(f"jump{i}.png", 'hero/jump'))
+
         self.img_name = self.idle_state[self.idle_count]
+        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.rect.left = x * TILE_SIZE
 
     def get_state(self, buttons):
         keys = pygame.key.get_pressed()
-        states = ["idle"]
+        states = []
         if buttons["space"]:
             states.append("jump")
-        elif keys[pygame.K_RIGHT]:
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             states.append("right")
-        elif keys[pygame.K_LEFT]:
+        elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
             states.append("left")
+        else:
+            states.append("idle")
         return states
 
     def update(self, buttons):
+        if not self.on_screen() or self.on_spikes():
+            self.kill()
+            game_over()
+        if self.on_finish():
+            lvl_completed()
+            level_up()
+
         curr_state = self.get_state(buttons)
         if "idle" in curr_state:
             if self.idle_count < 4:
                 self.idle_count += 1
             else:
                 self.idle_count = 0
+            self.img_name = self.idle_state[self.idle_count - 1]
+            self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+            clock.tick(FPS // 6)
+
+    def on_screen(self):
+        if self.rect.y <= HEIGHT:
+            return True
+        return False
+
+    def on_spikes(self):
+        if pygame.sprite.spritecollideany(self, spike_group):
+            return True
+        return False
+
+    def on_finish(self):
+        if pygame.sprite.spritecollideany(self, flag_group):
+            return True
+        return False
 
 
 BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
