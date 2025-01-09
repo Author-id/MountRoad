@@ -331,11 +331,11 @@ class Hero(pygame.sprite.Sprite):
         states = []
         if buttons["space"] or self.jump:
             states.append("jump")
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             states.append("right")
-        elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             states.append("left")
-        else:
+        if len(states) == 0:
             states.append("idle")
         return states
 
