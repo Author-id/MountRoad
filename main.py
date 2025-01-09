@@ -1,7 +1,8 @@
-import pygame
 import os
 import sys
 import time
+
+import pygame
 
 pygame.init()
 pygame.mixer.init()
@@ -303,6 +304,11 @@ class Hero(pygame.sprite.Sprite):
         for i in range(1, 7):
             self.jump_state.append(load_image(f"jump{i}.png", 'hero/jump'))
 
+        self.run_state = []
+        self.run_count = 0
+        for i in range(1, 6):
+            self.run_state.append(load_image(f"run{i}.png", 'hero/run'))
+
         self.img_name = self.idle_state[self.idle_count]
         self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
         self.rect = self.image.get_rect()
@@ -323,6 +329,8 @@ class Hero(pygame.sprite.Sprite):
         return states
 
     def update(self, buttons):
+        time = FPS // 6
+
         if not self.on_screen() or self.on_spikes():
             self.kill()
             game_over()
@@ -338,7 +346,11 @@ class Hero(pygame.sprite.Sprite):
                 self.idle_count = 0
             self.img_name = self.idle_state[self.idle_count - 1]
             self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
-            clock.tick(FPS // 6)
+
+        if 'left' in curr_state or 'right' in curr_state:
+            time = self.run(curr_state)
+
+        clock.tick(time)
 
     def on_screen(self):
         if self.rect.y <= HEIGHT:
@@ -354,6 +366,23 @@ class Hero(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, flag_group):
             return True
         return False
+
+    def run(self, curr_state):
+        time = FPS // 4
+        if self.run_count < 5:
+            self.run_count += 1
+        else:
+            self.run_count = 0
+        self.img_name = self.run_state[self.run_count - 1]
+        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+        if 'left' in curr_state and 'right' in curr_state:
+            pass
+        elif 'left' in curr_state:
+            self.image = pygame.transform.flip(self.image, 180, 0)
+            self.rect.left -= TILE_SIZE * 0.3
+        elif 'right' in curr_state:
+            self.rect.left += TILE_SIZE * 0.3
+        return time
 
 
 BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
