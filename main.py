@@ -11,6 +11,8 @@ TILE_SIZE = 60
 WIDTH = 1320
 HEIGHT = 12 * TILE_SIZE
 MAX_LVL = 2
+HEIGHT_JUMP = 20
+FREE_FALL = 13
 BLACK = pygame.Color('black')
 DARK_GREY = (40, 40, 40)
 
@@ -24,8 +26,11 @@ start_sound = pygame.mixer.Sound("data/sounds/start.wav")
 main_sound = pygame.mixer.Sound("data/sounds/main.wav")
 lvl_completed_sound = pygame.mixer.Sound("data/sounds/lvl_completed.wav")
 jump_sound = pygame.mixer.Sound("data/sounds/jump.wav")
+jump_sound.set_volume(0.15)
 game_over_sound = pygame.mixer.Sound("data/sounds/game_over.mp3")
+game_over_sound.set_volume(0.25)
 finish_sound = pygame.mixer.Sound("data/sounds/finish.wav")
+finish_sound.set_volume(0.25)
 
 sign_group = pygame.sprite.Group()
 bonfire_group = pygame.sprite.Group()
@@ -122,7 +127,7 @@ def start_screen():  # начальный экран
             if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                 start_sound.stop()
                 main_sound.play(-1)
-                main_sound.set_volume(0.15)
+                main_sound.set_volume(0.25)
                 return
         clock.tick(FPS)
         pygame.display.flip()
@@ -298,6 +303,12 @@ class Spike(pygame.sprite.Sprite):
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
+        self.speed = 5
+        self.free_fall = False
+        self.jump = False
+        self.jump_sound = False
+        self.height_jump = HEIGHT_JUMP
+        self.cnt = 0
 
         self.idle_state = []
         self.idle_count = 0
@@ -318,7 +329,7 @@ class Hero(pygame.sprite.Sprite):
     def get_state(self, buttons):
         keys = pygame.key.get_pressed()
         states = []
-        if buttons["space"]:
+        if buttons["space"] or self.jump:
             states.append("jump")
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             states.append("right")
@@ -339,12 +350,67 @@ class Hero(pygame.sprite.Sprite):
         curr_state = self.get_state(buttons)
         if "idle" in curr_state:
             if self.idle_count < 4:
-                self.idle_count += 1
+                if self.cnt % 5 == 0:
+                    self.idle_count += 1
             else:
-                self.idle_count = 0
+                self.idle_count = 1
             self.img_name = self.idle_state[self.idle_count - 1]
             self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
-            clock.tick(FPS // 6)
+            self.cnt += 0.5
+
+        elif "jump" in curr_state:
+            self.jump = True
+            if not self.jump_sound:
+                jump_sound.play()
+                self.jump_sound = True
+
+            self.rect.y -= self.height_jump
+            self.height_jump -= 1
+            if pygame.sprite.spritecollideany(self, tile_group):
+                if self.height_jump > 0:
+                    self.rect.bottom += self.height_jump
+                    self.height_jump = 0
+                elif self.height_jump < 0:
+                    self.rect.bottom -= self.rect.bottom % TILE_SIZE
+                    self.height_jump = HEIGHT_JUMP
+                    self.jump = False
+
+            if "right" in curr_state:
+                self.rect.x += self.speed
+                if pygame.sprite.spritecollideany(self, tile_group):
+                    self.rect.x -= self.speed
+
+            elif "left" in curr_state:
+                self.rect.x -= self.speed
+                if pygame.sprite.spritecollideany(self, tile_group):
+                    self.rect.x += self.speed
+
+            if self.jump_count < 3 or self.jump_count > 4:
+                self.jump_count += 1
+                clock.tick(FPS)
+                if self.jump_count == 7:
+                    self.jump_count = 0
+            elif 3 <= self.jump_count <= 4:
+                if self.height_jump > 0:
+                    if self.height_jump > (HEIGHT_JUMP - 2):
+                        self.jump_count = 2
+                    else:
+                        self.jump_count = 3
+                else:
+                    if self.height_jump > -(HEIGHT_JUMP - 2):
+                        self.jump_count = 4
+                    else:
+                        self.jump_count = 5
+            self.img_name = self.jump_state[self.jump_count - 1]
+            self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+
+        if not self.jump and not pygame.sprite.spritecollideany(self, tile_group):
+            if "idle" in curr_state:
+                self.image = pygame.transform.scale(self.jump_state[3], (TILE_SIZE, TILE_SIZE))
+            self.rect.bottom += FREE_FALL
+            if pygame.sprite.spritecollideany(self, tile_group):
+                self.rect.bottom -= self.rect.bottom % TILE_SIZE
+                self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
 
     def on_screen(self):
         if self.rect.y <= HEIGHT:
