@@ -320,10 +320,16 @@ class Hero(pygame.sprite.Sprite):
         states = []
         if buttons["space"]:
             states.append("jump")
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not keys[pygame.K_SPACE]:
             states.append("right")
-        elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            states.append('run')
+        elif (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not keys[pygame.K_SPACE]:
             states.append("left")
+            states.append('run')
+        elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            states.append('left')
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            states.append('right')
         else:
             states.append("idle")
         return states
@@ -346,7 +352,7 @@ class Hero(pygame.sprite.Sprite):
             self.img_name = self.idle_state[self.idle_count - 1]
             self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
 
-        if 'left' in curr_state or 'right' in curr_state:
+        if ('left' in curr_state or 'right' in curr_state) and 'run' in curr_state:
             if self.run_count < 5:
                 self.run_count += 0.25
             else:
@@ -358,16 +364,10 @@ class Hero(pygame.sprite.Sprite):
                 pass
             elif 'left' in curr_state:
                 self.image = pygame.transform.flip(self.image, 180, 0)
-                if pygame.sprite.spritecollideany(self, tile_group) is not None:
+                if pygame.sprite.spritecollideany(self, tile_group):
                     self.rect.left -= TILE_SIZE * 0.09
             elif 'right' in curr_state:
-                collision = pygame.sprite.spritecollideany(self, tile_group)
-                if collision is not None:
-                    print(f"Столкновение с: {collision}")
-                    self.rect.left += TILE_SIZE * 0.09
-                else:
-                    print("Нет столкновения")
-                if pygame.sprite.spritecollideany(self, tile_group) is not None:
+                if pygame.sprite.spritecollideany(self, tile_group):
                     self.rect.left += TILE_SIZE * 0.09
 
     def on_screen(self):
