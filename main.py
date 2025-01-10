@@ -329,7 +329,6 @@ class Hero(pygame.sprite.Sprite):
         return states
 
     def update(self, buttons):
-        time = FPS // 6
 
         if not self.on_screen() or self.on_spikes():
             self.kill()
@@ -348,9 +347,7 @@ class Hero(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
 
         if 'left' in curr_state or 'right' in curr_state:
-            time = self.run(curr_state)
-
-        clock.tick(time)
+            self.run(curr_state)
 
     def on_screen(self):
         if self.rect.y <= HEIGHT:
@@ -368,20 +365,20 @@ class Hero(pygame.sprite.Sprite):
         return False
 
     def run(self, curr_state):
-        time = FPS // 4
         if self.run_count < 5:
-            self.run_count += 1
+            self.run_count += 0.25
         else:
-            self.run_count = 0
-        self.img_name = self.run_state[self.run_count - 1]
+            self.run_count = 1
+        if self.run_count == int(self.run_count):
+            self.img_name = self.run_state[int(self.run_count) - 1]
         self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
         if 'left' in curr_state and 'right' in curr_state:
             pass
         elif 'left' in curr_state:
             self.image = pygame.transform.flip(self.image, 180, 0)
-            self.rect.left -= TILE_SIZE * 0.3
+            self.rect.left -= TILE_SIZE * 0.09
         elif 'right' in curr_state:
-            self.rect.left += TILE_SIZE * 0.3
+            self.rect.left += TILE_SIZE * 0.09
         return time
 
 
