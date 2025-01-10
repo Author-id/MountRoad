@@ -376,9 +376,17 @@ class Hero(pygame.sprite.Sprite):
             pass
         elif 'left' in curr_state:
             self.image = pygame.transform.flip(self.image, 180, 0)
-            self.rect.left -= TILE_SIZE * 0.09
+            if pygame.sprite.spritecollideany(self, tile_group) is not None:
+                self.rect.left -= TILE_SIZE * 0.09
         elif 'right' in curr_state:
-            self.rect.left += TILE_SIZE * 0.09
+            collision = pygame.sprite.spritecollideany(self, tile_group)
+            if collision is not None:
+                print(f"Столкновение с: {collision}")
+                self.rect.left += TILE_SIZE * 0.09
+            else:
+                print("Нет столкновения")
+            if pygame.sprite.spritecollideany(self, tile_group) is not None:
+                self.rect.left += TILE_SIZE * 0.09
         return time
 
 
