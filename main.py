@@ -21,6 +21,8 @@ pygame.display.set_caption("Mount Road")
 lvl = 1
 player = None
 clock = pygame.time.Clock()
+left_check = 0
+right_check = 0
 
 start_sound = pygame.mixer.Sound("data/sounds/start.wav")
 main_sound = pygame.mixer.Sound("data/sounds/main.wav")
@@ -318,6 +320,11 @@ class Hero(pygame.sprite.Sprite):
         for i in range(1, 7):
             self.jump_state.append(load_image(f"jump{i}.png", 'hero/jump'))
 
+        self.run_state = []
+        self.run_count = 1
+        for i in range(1, 7):
+            self.run_state.append(load_image(f"run{i}.png", 'hero/run'))
+
         self.curr_image = 0
         self.img_name = self.idle_state[self.idle_count]
         self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
@@ -354,7 +361,7 @@ class Hero(pygame.sprite.Sprite):
         if curr_state != self.new_state:
             self.idle_count = 0
             self.jump_count = 0
-            # self.run_count = 0
+            self.run_count = 1
             self.curr_image = 0
             self.new_state = curr_state
 
@@ -364,12 +371,17 @@ class Hero(pygame.sprite.Sprite):
         elif "jump" in curr_state:
             self.jump(curr_state)
 
+        elif 'left' in curr_state or 'right' in curr_state:
+            self.run(curr_state)
+
         if not self.is_jump and not self.collide_mask_check(self, tile_group):
-            self.image = pygame.transform.scale(self.jump_state[3], (TILE_SIZE, TILE_SIZE))
+            if "idle" in curr_state:
+                self.image = pygame.transform.scale(self.jump_state[3], (TILE_SIZE, TILE_SIZE))
             self.rect.bottom += FREE_FALL
             if pygame.sprite.spritecollideany(self, tile_group):
                 self.rect.bottom -= self.rect.bottom % TILE_SIZE
-                self.image = pygame.transform.scale(self.idle_state[self.curr_image], (TILE_SIZE, TILE_SIZE))
+                if "idle" in curr_state:
+                    self.image = pygame.transform.scale(self.idle_state[self.curr_image], (TILE_SIZE, TILE_SIZE))
 
     def idle(self, curr_state):
         self.idle_count = (self.idle_count + 1) % 9
@@ -378,11 +390,37 @@ class Hero(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(self.idle_state[self.curr_image], "left" in curr_state, 0)
             self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
 
+    def run(self, curr_state):
+        global left_check
+        global right_check
+        if self.run_count < 5:
+            self.run_count += 0.15
+        else:
+            self.run_count = 1
+        if isinstance(int(self.run_count), int):
+            self.img_name = self.run_state[int(self.run_count) - 1]
+        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+        if 'left' in curr_state:
+            self.image = pygame.transform.flip(self.image, 180, 0)
+            if not pygame.sprite.spritecollideany(self, tile_group) or right_check == 1:
+                self.rect.left -= TILE_SIZE * 0.09
+                left_check = 0
+                right_check = 0
+            elif pygame.sprite.spritecollideany(self, tile_group):
+                left_check = 1
+        elif 'right' in curr_state:
+            if not pygame.sprite.spritecollideany(self, tile_group) or left_check == 1:
+                self.rect.left += TILE_SIZE * 0.09
+                right_check = 0
+                left_check = 0
+            elif pygame.sprite.spritecollideany(self, tile_group):
+                right_check = 1
+
     def jump(self, curr_state):
         self.is_jump = True
-
         self.rect.y -= self.height_jump
         self.height_jump -= 1
+
         if pygame.sprite.spritecollideany(self, tile_group):
             if self.height_jump > 0:
                 self.rect.bottom += self.height_jump
