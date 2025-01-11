@@ -20,6 +20,8 @@ pygame.display.set_caption("Mountains")
 lvl = 1
 player = None
 clock = pygame.time.Clock()
+left_check = 0
+right_check = 0
 
 lvl_completed_sound = pygame.mixer.Sound("data/sounds/lvl_completed.wav")
 game_sound = pygame.mixer.Sound("data/sounds/game.wav")
@@ -356,6 +358,8 @@ class Hero(pygame.sprite.Sprite):
             self.run(curr_state)
 
     def run(self, curr_state):
+        global left_check
+        global right_check
         if self.run_count < 5:
             self.run_count += 0.25
         else:
@@ -367,15 +371,19 @@ class Hero(pygame.sprite.Sprite):
             pass
         elif 'left' in curr_state:
             self.image = pygame.transform.flip(self.image, 180, 0)
-            if pygame.sprite.spritecollideany(self, tile_group) is None:
+            if pygame.sprite.spritecollideany(self, tile_group) is None or right_check == 1:
                 self.rect.left -= TILE_SIZE * 0.09
-            else:
-                self.rect.left += 3
+                left_check = 0
+                right_check = 0
+            elif pygame.sprite.spritecollideany(self, tile_group):
+                left_check = 1
         elif 'right' in curr_state:
-            if pygame.sprite.spritecollideany(self, tile_group) is None:
+            if pygame.sprite.spritecollideany(self, tile_group) is None or left_check == 1:
                 self.rect.left += TILE_SIZE * 0.09
-            else:
-                self.rect.left += 3
+                right_check = 0
+                left_check = 0
+            elif pygame.sprite.spritecollideany(self, tile_group):
+                right_check = 1
 
     def on_screen(self):
         if self.rect.y <= HEIGHT:
@@ -391,7 +399,6 @@ class Hero(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, flag_group):
             return True
         return False
-
 
 
 BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
