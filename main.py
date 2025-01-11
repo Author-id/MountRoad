@@ -307,7 +307,7 @@ class Hero(pygame.sprite.Sprite):
             self.jump_state.append(load_image(f"jump{i}.png", 'hero/jump'))
 
         self.run_state = []
-        self.run_count = 0
+        self.run_count = 1
         for i in range(1, 6):
             self.run_state.append(load_image(f"run{i}.png", 'hero/run'))
 
@@ -361,10 +361,11 @@ class Hero(pygame.sprite.Sprite):
         global left_check
         global right_check
         if self.run_count < 5:
-            self.run_count += 0.25
+            self.run_count += 0.15
+            print(self.run_count)
         else:
             self.run_count = 1
-        if self.run_count == int(self.run_count):
+        if isinstance(int(self.run_count), int):
             self.img_name = self.run_state[int(self.run_count) - 1]
         self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
         if 'left' in curr_state and 'right' in curr_state:
