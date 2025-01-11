@@ -17,7 +17,7 @@ BLACK = pygame.Color('black')
 DARK_GREY = (40, 40, 40)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Mountains")
+pygame.display.set_caption("Mount Road")
 lvl = 1
 player = None
 clock = pygame.time.Clock()
@@ -144,7 +144,7 @@ def lvl_completed():  # уровень пройден
     p_text = pressed.render('press any button', True, DARK_GREY)
     screen.blit(p_text, (WIDTH // 2 - p_text.get_width() // 2, 440))
     times = pygame.font.Font(None, 55)
-    t_text = times.render(f"Your time: {minutes}.{seconds}", True, BLACK)
+    t_text = times.render(f"Time: {minutes}.{seconds}", True, BLACK)
     screen.blit(t_text, (WIDTH // 2 - t_text.get_width() // 2, 400))
 
     while True:
@@ -302,7 +302,7 @@ class Spike(pygame.sprite.Sprite):
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
-        self.speed = 5
+        self.speed = 4
         self.free_fall = False
         self.is_jump = False
         self.height_jump = HEIGHT_JUMP
@@ -364,7 +364,7 @@ class Hero(pygame.sprite.Sprite):
         elif "jump" in curr_state:
             self.jump(curr_state)
 
-        if not self.is_jump and not pygame.sprite.spritecollideany(self, tile_group):
+        if not self.is_jump and not self.collide_mask_check(self, tile_group):
             self.image = pygame.transform.scale(self.jump_state[3], (TILE_SIZE, TILE_SIZE))
             self.rect.bottom += FREE_FALL
             if pygame.sprite.spritecollideany(self, tile_group):
@@ -422,18 +422,27 @@ class Hero(pygame.sprite.Sprite):
         self.image = pygame.transform.flip(self.img_name, "left" in curr_state, 0)
         self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
 
+    def collide_mask_check(self, sprite, sprite_group):
+        curr_mask = pygame.mask.from_surface(sprite.image)
+        for item in sprite_group:
+            sprite_mask = pygame.mask.from_surface(item.image)
+            offset = (item.rect.x - sprite.rect.x, item.rect.y - sprite.rect.y)
+            if curr_mask.overlap(sprite_mask, offset):
+                return True
+        return False
+
     def on_screen(self):
         if self.rect.y <= HEIGHT:
             return True
         return False
 
     def on_spikes(self):
-        if pygame.sprite.spritecollideany(self, spike_group):
+        if self.collide_mask_check(self, spike_group):
             return True
         return False
 
     def on_finish(self):
-        if pygame.sprite.spritecollideany(self, flag_group):
+        if self.collide_mask_check(self, flag_group):
             return True
         return False
 
