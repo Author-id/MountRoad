@@ -5,7 +5,6 @@ import time
 
 pygame.init()
 pygame.mixer.init()
-# add dev brunch
 FPS = 60
 TILE_SIZE = 60
 WIDTH = 1320
@@ -19,7 +18,7 @@ DARK_GREY = (40, 40, 40)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Mount Road")
 lvl = 1
-player = None
+hero = None
 clock = pygame.time.Clock()
 left_check = 0
 right_check = 0
@@ -51,9 +50,9 @@ group_lst = [tree_group, stone_group, house_group, sign_group,
 
 def load_image(name, directory=None, colorkey=None):
     if directory is not None:
-        fullname = os.path.join(f'Data/{directory}', name)
+        fullname = os.path.join(f'data/{directory}', name)
     else:
-        fullname = os.path.join('Data', name)
+        fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
@@ -76,11 +75,11 @@ def load_level(filename):  # загрузка карты
 
 
 def create_level(level):  # создание уровня
-    global player
+    global hero
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == "&":
-                player = Hero(x, y)
+                hero = Hero(x, y)
             elif level[y][x] == "f":
                 Flag(x, y)
             elif level[y][x] == "@":
@@ -228,8 +227,8 @@ class Sign(pygame.sprite.Sprite):
 class Bush(pygame.sprite.Sprite):
     def __init__(self, bash_type, x, y):
         super().__init__(bash_group, all_sprites)
-        self.size_x = TILE_SIZE * 3
-        self.size_y = TILE_SIZE * 2
+        self.size_x = TILE_SIZE * 2
+        self.size_y = TILE_SIZE * 1
         if bash_type == "п":
             self.size_x = TILE_SIZE * 1.5
             self.size_y = 32
@@ -299,6 +298,17 @@ class Spike(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.bottom = (y + 1) * TILE_SIZE
         self.rect.left = x * TILE_SIZE
+
+
+class Camera:
+    def __init__(self):
+        self.dx = 0
+
+    def map_shift(self, subject):
+        subject.rect.x += self.dx
+
+    def update(self, object):
+        self.dx = -(object.rect.x + object.rect.w - WIDTH // 2)
 
 
 class Hero(pygame.sprite.Sprite):
@@ -486,6 +496,7 @@ class Hero(pygame.sprite.Sprite):
 
 
 BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
+camera = Camera()
 start_screen()
 if __name__ == '__main__':
     running = True
@@ -506,6 +517,9 @@ if __name__ == '__main__':
         time_font = pygame.font.Font(None, 30)
         time_txt = time_font.render(f"{minutes}.{seconds}", True, (0, 0, 0))
         hero_group.update(keys)
+        camera.update(hero)
+        for sprite in all_sprites:
+            camera.map_shift(sprite)
         for group in group_lst:
             group.draw(screen)
         screen.blit(time_txt, (10, 5))
