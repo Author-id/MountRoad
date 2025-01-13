@@ -68,10 +68,11 @@ def load_image(name, directory=None, colorkey=None):
 
 
 def load_level(filename):  # загрузка карты
-    filename = "Levels/" + filename
+    filename = "levels/" + filename
     with open(filename, 'r', encoding="UTF-8") as lvlFile:
         level_map = [line.strip() for line in lvlFile]
-    return level_map
+    max_width = max(map(len, level_map))
+    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
 def create_level(level):  # создание уровня
@@ -304,11 +305,11 @@ class Camera:
     def __init__(self):
         self.dx = 0
 
-    def map_shift(self, subject):
+    def apply(self, subject):
         subject.rect.x += self.dx
 
-    def update(self, object):
-        self.dx = -(object.rect.x + object.rect.w - WIDTH // 2)
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w - WIDTH // 2)
 
 
 class Hero(pygame.sprite.Sprite):
@@ -519,7 +520,7 @@ if __name__ == '__main__':
         hero_group.update(keys)
         camera.update(hero)
         for sprite in all_sprites:
-            camera.map_shift(sprite)
+            camera.apply(sprite)
         for group in group_lst:
             group.draw(screen)
         screen.blit(time_txt, (10, 5))
