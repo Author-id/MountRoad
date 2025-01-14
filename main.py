@@ -357,8 +357,6 @@ class Hero(pygame.sprite.Sprite):
             states.append("right")
         elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
             states.append("left")
-        if self.on_spikes():
-            states.append('death')
         if len(states) == 0:
             states.append("idle")
         return states
