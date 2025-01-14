@@ -489,7 +489,7 @@ class Hero(pygame.sprite.Sprite):
     def death(self):
         global l_check
         if self.death_count < 6:
-            self.death_count += 0.15
+            self.death_count += 0.2
         else:
             self.kill()
             game_over()
@@ -497,7 +497,8 @@ class Hero(pygame.sprite.Sprite):
             self.img_name = self.death_state[int(self.death_count) - 1]
         self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
         if l_check == 1:
-            self.image = pygame.transform.flip(self.image, 180, False)
+            self.image = pygame.transform.flip(self.image, True, False)
+            l_check = 0
 
     def collide_mask_check(self, sprite, sprite_group):
         curr_mask = pygame.mask.from_surface(sprite.image)
