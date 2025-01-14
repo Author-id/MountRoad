@@ -357,19 +357,16 @@ class Hero(pygame.sprite.Sprite):
             states.append("right")
         elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
             states.append("left")
+        if self.on_spikes():
+            states.append('death')
         if len(states) == 0:
             states.append("idle")
         return states
 
     def update(self, buttons):
-        if not self.on_screen() or self.on_spikes():
-            if self.on_spikes():
-                self.death()
-                # self.kill()
-                # game_over()
-            else:
-                self.kill()
-                game_over()
+        if not self.on_screen():
+            self.kill()
+            game_over()
         if self.on_finish():
             self.kill()
             lvl_completed()
@@ -385,6 +382,12 @@ class Hero(pygame.sprite.Sprite):
             self.run_count = 1
             self.curr_image = 0
             self.new_state = curr_state
+
+        if self.on_spikes():
+            curr_state = 'death'
+
+        if curr_state == 'death':
+            self.death()
 
         if "idle" in curr_state:
             self.idle(curr_state)
@@ -482,21 +485,14 @@ class Hero(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
 
     def death(self):
-        # a = 0
-        # if 'left' in curr_state:
-        #     a = 1
-        if int(self.death_count) < 6:
-            self.death_count += 0.2
+        if self.death_count < 6:
+            self.death_count += 0.1
         else:
             self.kill()
             game_over()
         if isinstance(int(self.death_count), int):
-            print(int(self.death_count))
             self.img_name = self.death_state[int(self.death_count) - 1]
-            print(self.img_name)
-        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
-        # if a == 1:
-        #     self.image = pygame.transform.flip(self.img_name, 180, 0)
+        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE * 1.2, TILE_SIZE * 1.2))
 
     def collide_mask_check(self, sprite, sprite_group):
         curr_mask = pygame.mask.from_surface(sprite.image)
