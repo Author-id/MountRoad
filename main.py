@@ -336,6 +336,11 @@ class Hero(pygame.sprite.Sprite):
         for i in range(1, 7):
             self.run_state.append(load_image(f"run{i}.png", 'hero/run'))
 
+        self.death_state = []
+        self.death_count = 1
+        for i in range(1, 7):
+            self.death_state.append(load_image(f'{i}.png', 'hero/death'))
+
         self.curr_image = 0
         self.img_name = self.idle_state[self.idle_count]
         self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
@@ -358,8 +363,13 @@ class Hero(pygame.sprite.Sprite):
 
     def update(self, buttons):
         if not self.on_screen() or self.on_spikes():
-            self.kill()
-            game_over()
+            if self.on_spikes():
+                self.death()
+                # self.kill()
+                # game_over()
+            else:
+                self.kill()
+                game_over()
         if self.on_finish():
             self.kill()
             lvl_completed()
@@ -470,6 +480,23 @@ class Hero(pygame.sprite.Sprite):
         self.img_name = self.jump_state[self.jump_count - 1]
         self.image = pygame.transform.flip(self.img_name, "left" in curr_state, 0)
         self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
+
+    def death(self):
+        # a = 0
+        # if 'left' in curr_state:
+        #     a = 1
+        if int(self.death_count) < 6:
+            self.death_count += 0.2
+        else:
+            self.kill()
+            game_over()
+        if isinstance(int(self.death_count), int):
+            print(int(self.death_count))
+            self.img_name = self.death_state[int(self.death_count) - 1]
+            print(self.img_name)
+        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+        # if a == 1:
+        #     self.image = pygame.transform.flip(self.img_name, 180, 0)
 
     def collide_mask_check(self, sprite, sprite_group):
         curr_mask = pygame.mask.from_surface(sprite.image)
