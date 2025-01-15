@@ -14,6 +14,7 @@ HEIGHT_JUMP = 18
 FREE_FALL = 13
 BLACK = pygame.Color('black')
 DARK_GREY = (40, 40, 40)
+l_check = 0
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Mount Road")
@@ -336,6 +337,11 @@ class Hero(pygame.sprite.Sprite):
         for i in range(1, 7):
             self.run_state.append(load_image(f"run{i}.png", 'hero/run'))
 
+        self.death_state = []
+        self.death_count = 1
+        for i in range(1, 7):
+            self.death_state.append(load_image(f'{i}.png', 'hero/death'))
+
         self.curr_image = 0
         self.img_name = self.idle_state[self.idle_count]
         self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
@@ -357,7 +363,7 @@ class Hero(pygame.sprite.Sprite):
         return states
 
     def update(self, buttons):
-        if not self.on_screen() or self.on_spikes():
+        if not self.on_screen():
             self.kill()
             game_over()
         if self.on_finish():
@@ -375,6 +381,15 @@ class Hero(pygame.sprite.Sprite):
             self.run_count = 1
             self.curr_image = 0
             self.new_state = curr_state
+
+        if self.on_spikes():
+            global l_check
+            if 'left' in curr_state:
+                l_check = 1
+            curr_state = 'death'
+
+        if curr_state == 'death':
+            self.death()
 
         if "idle" in curr_state:
             self.idle(curr_state)
@@ -471,11 +486,25 @@ class Hero(pygame.sprite.Sprite):
         self.image = pygame.transform.flip(self.img_name, "left" in curr_state, 0)
         self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
 
+    def death(self):
+        global l_check
+        if self.death_count < 6:
+            self.death_count += 0.2
+        else:
+            self.kill()
+            game_over()
+        if isinstance(int(self.death_count), int):
+            self.img_name = self.death_state[int(self.death_count) - 1]
+        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+        if l_check == 1:
+            self.image = pygame.transform.flip(self.image, True, False)
+            l_check = 0
+
     def collide_mask_check(self, sprite, sprite_group):
         curr_mask = pygame.mask.from_surface(sprite.image)
         for item in sprite_group:
             sprite_mask = pygame.mask.from_surface(item.image)
-            offset = (item.rect.x - sprite.rect.x, item.rect.y - sprite.rect.y)
+            offset = (item.rect.x - sprite.rect.x + 1, item.rect.y - sprite.rect.y - 1)
             if curr_mask.overlap(sprite_mask, offset):
                 return True
         return False
@@ -486,7 +515,7 @@ class Hero(pygame.sprite.Sprite):
         return False
 
     def on_spikes(self):
-        if self.collide_mask_check(self, spike_group):
+        if self.collide_mask_check(self, spike_group) and self.collide_mask_check(self, tile_group):
             return True
         return False
 
