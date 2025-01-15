@@ -6,15 +6,14 @@ import time
 pygame.init()
 pygame.mixer.init()
 FPS = 60
-TILE_SIZE = 60
-WIDTH = 1320
+TILE_SIZE = 65
+WIDTH = 21 * TILE_SIZE
 HEIGHT = 12 * TILE_SIZE
 MAX_LVL = 2
 HEIGHT_JUMP = 18
 FREE_FALL = 13
 BLACK = pygame.Color('black')
 DARK_GREY = (40, 40, 40)
-l_check = 0
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Mount Road")
@@ -23,6 +22,7 @@ hero = None
 clock = pygame.time.Clock()
 left_check = 0
 right_check = 0
+l_check = 0
 
 start_sound = pygame.mixer.Sound("data/sounds/start.wav")
 main_sound = pygame.mixer.Sound("data/sounds/main.wav")
@@ -46,7 +46,7 @@ spike_group = pygame.sprite.Group()
 flag_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 group_lst = [tree_group, stone_group, house_group, sign_group,
-             tile_group, spike_group, flag_group, bash_group, hero_group]
+             spike_group, hero_group, tile_group, flag_group, bash_group]
 
 
 def load_image(name, directory=None, colorkey=None):
@@ -316,7 +316,7 @@ class Camera:
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
-        self.speed = 4
+        self.speed = 5
         self.free_fall = False
         self.is_jump = False
         self.height_jump = HEIGHT_JUMP
@@ -324,30 +324,25 @@ class Hero(pygame.sprite.Sprite):
 
         self.idle_state = []
         self.idle_count = 0
-        for i in range(1, 5):
+        for i in range(1, 8):
             self.idle_state.append(load_image(f"idle{i}.png", 'hero/idle'))
 
-        self.jump_state = []
-        self.jump_count = 0
-        for i in range(1, 7):
-            self.jump_state.append(load_image(f"jump{i}.png", 'hero/jump'))
-
-        self.run_state = []
+        self.run_state = self.jump_state = []
         self.run_count = 1
-        for i in range(1, 7):
+        self.jump_count = 0
+        for i in range(1, 9):
             self.run_state.append(load_image(f"run{i}.png", 'hero/run'))
 
         self.death_state = []
         self.death_count = 1
-        for i in range(1, 7):
-            self.death_state.append(load_image(f'{i}.png', 'hero/death'))
+        for i in range(1, 6):
+            self.death_state.append(load_image(f'death{i}.png', 'hero/death'))
 
         self.curr_image = 0
-        self.img_name = self.idle_state[self.idle_count]
-        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
-        self.rect = self.image.get_rect()
-        self.rect.bottom = (y + 1) * TILE_SIZE
+        self.image = self.idle_state[self.idle_count]
+        self.rect = load_image(f'hero.png', 'hero').get_rect()
         self.rect.left = x * TILE_SIZE
+        self.rect.bottom = (y + 1) * TILE_SIZE
 
     def get_state(self, buttons):
         keys = pygame.key.get_pressed()
@@ -386,46 +381,41 @@ class Hero(pygame.sprite.Sprite):
             global l_check
             if 'left' in curr_state:
                 l_check = 1
-            curr_state = 'death'
+            curr_state = ['death']
 
-        if curr_state == 'death':
+        if curr_state == ['death']:
             self.death()
 
         if "idle" in curr_state:
             self.idle(curr_state)
 
         elif "jump" in curr_state:
+            self.is_jump = True
             self.jump(curr_state)
 
         elif 'left' in curr_state or 'right' in curr_state:
             self.run(curr_state)
 
-        if not self.is_jump and not self.collide_mask_check(self, tile_group):
-            if "idle" in curr_state:
-                self.image = pygame.transform.scale(self.jump_state[3], (TILE_SIZE, TILE_SIZE))
+        if not self.is_jump and not pygame.sprite.spritecollideany(self, tile_group):
             self.rect.bottom += FREE_FALL
             if pygame.sprite.spritecollideany(self, tile_group):
                 self.rect.bottom -= self.rect.bottom % TILE_SIZE
-                if "idle" in curr_state:
-                    self.image = pygame.transform.scale(self.idle_state[self.curr_image], (TILE_SIZE, TILE_SIZE))
 
     def idle(self, curr_state):
-        self.idle_count = (self.idle_count + 1) % 9
-        if self.idle_count == 8:
+        self.idle_count = (self.idle_count + 1) % 10
+        if self.idle_count == 9:
             self.curr_image = (self.curr_image + 1) % len(self.idle_state)
             self.image = pygame.transform.flip(self.idle_state[self.curr_image], "left" in curr_state, 0)
-            self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
 
     def run(self, curr_state):
         global left_check
         global right_check
-        if self.run_count < 5:
+        if self.run_count < 7:
             self.run_count += 0.15
         else:
             self.run_count = 1
         if isinstance(int(self.run_count), int):
-            self.img_name = self.run_state[int(self.run_count) - 1]
-        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+            self.image = self.run_state[int(self.run_count) - 1]
         if 'left' in curr_state:
             self.image = pygame.transform.flip(self.image, 180, 0)
             if not pygame.sprite.spritecollideany(self, tile_group) or right_check == 1:
@@ -443,18 +433,17 @@ class Hero(pygame.sprite.Sprite):
                 right_check = 1
 
     def jump(self, curr_state):
-        self.is_jump = True
         self.rect.y -= self.height_jump
         self.height_jump -= 1
 
         if pygame.sprite.spritecollideany(self, tile_group):
-            if self.height_jump > 0:
-                self.rect.bottom += self.height_jump
-                self.height_jump = 0
-            elif self.height_jump < 0:
+            if self.height_jump < 0:
                 self.rect.bottom -= self.rect.bottom % TILE_SIZE
                 self.height_jump = HEIGHT_JUMP
                 self.is_jump = False
+            elif self.height_jump > 0:
+                self.rect.bottom += self.height_jump
+                self.height_jump = 0
 
         if "right" in curr_state:
             self.rect.x += self.speed
@@ -466,36 +455,20 @@ class Hero(pygame.sprite.Sprite):
             if pygame.sprite.spritecollideany(self, tile_group):
                 self.rect.x += self.speed
 
-        if self.jump_count < 3 or self.jump_count > 4:
-            self.jump_count += 1
-            clock.tick(FPS)
-            if self.jump_count == 7:
-                self.jump_count = 0
-        elif 3 <= self.jump_count <= 4:
-            if self.height_jump > 0:
-                if self.height_jump > (HEIGHT_JUMP - 2):
-                    self.jump_count = 2
-                else:
-                    self.jump_count = 3
-            else:
-                if self.height_jump > -(HEIGHT_JUMP - 1):
-                    self.jump_count = 4
-                else:
-                    self.jump_count = 5
-        self.img_name = self.jump_state[self.jump_count - 1]
-        self.image = pygame.transform.flip(self.img_name, "left" in curr_state, 0)
-        self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
+        self.jump_count = (self.jump_count + 1) % 6
+        if self.jump_count == 5:
+            self.curr_image = (self.curr_image + 1) % len(self.jump_state)
+            self.image = pygame.transform.flip(self.jump_state[self.curr_image], "left" in curr_state, False)
 
     def death(self):
         global l_check
-        if self.death_count < 6:
+        if self.death_count < 5:
             self.death_count += 0.2
         else:
             self.kill()
             game_over()
         if isinstance(int(self.death_count), int):
-            self.img_name = self.death_state[int(self.death_count) - 1]
-        self.image = pygame.transform.scale(self.img_name, (TILE_SIZE, TILE_SIZE))
+            self.image = self.death_state[int(self.death_count) - 1]
         if l_check == 1:
             self.image = pygame.transform.flip(self.image, True, False)
             l_check = 0
@@ -515,7 +488,7 @@ class Hero(pygame.sprite.Sprite):
         return False
 
     def on_spikes(self):
-        if self.collide_mask_check(self, spike_group) and self.collide_mask_check(self, tile_group):
+        if self.collide_mask_check(self, spike_group):
             return True
         return False
 
