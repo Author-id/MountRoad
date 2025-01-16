@@ -21,8 +21,6 @@ pygame.display.set_caption("Mount Road")
 lvl = 1
 hero = None
 clock = pygame.time.Clock()
-left_check = 0
-right_check = 0
 l_check = 0
 
 start_sound = pygame.mixer.Sound("data/sounds/start.wav")
