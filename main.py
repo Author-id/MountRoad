@@ -11,7 +11,8 @@ WIDTH = 21 * TILE_SIZE
 HEIGHT = 12 * TILE_SIZE
 MAX_LVL = 2
 HEIGHT_JUMP = 18
-GRAVITY = 13
+GRAVITY = 12
+SPEED = 5
 BLACK = pygame.Color('black')
 DARK_GREY = (40, 40, 40)
 
@@ -316,7 +317,6 @@ class Camera:
 class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
-        self.speed = 5
         self.is_jump = False
         self.height_jump = HEIGHT_JUMP
         self.new_state = ["idle"]
@@ -395,7 +395,7 @@ class Hero(pygame.sprite.Sprite):
         elif 'left' in curr_state or 'right' in curr_state:
             self.run(curr_state)
 
-        if not self.is_jump and not pygame.sprite.spritecollideany(self, tile_group):
+        if not self.is_jump:
             self.rect.bottom += GRAVITY
             if pygame.sprite.spritecollideany(self, tile_group):
                 self.rect.bottom -= self.rect.bottom % TILE_SIZE
@@ -407,29 +407,23 @@ class Hero(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(self.idle_state[self.curr_image], "left" in curr_state, 0)
 
     def run(self, curr_state):
-        global left_check
-        global right_check
-        if self.run_count < 7:
-            self.run_count += 0.15
-        else:
-            self.run_count = 1
-        if isinstance(int(self.run_count), int):
-            self.image = self.run_state[int(self.run_count) - 1]
-        if 'left' in curr_state:
-            self.image = pygame.transform.flip(self.image, 180, 0)
-            if not pygame.sprite.spritecollideany(self, tile_group) or right_check == 1:
-                self.rect.left -= TILE_SIZE * 0.09
-                left_check = 0
-                right_check = 0
-            elif pygame.sprite.spritecollideany(self, tile_group):
-                left_check = 1
-        elif 'right' in curr_state:
-            if not pygame.sprite.spritecollideany(self, tile_group) or left_check == 1:
-                self.rect.left += TILE_SIZE * 0.09
-                right_check = 0
-                left_check = 0
-            elif pygame.sprite.spritecollideany(self, tile_group):
-                right_check = 1
+        if "right" in curr_state:
+            self.rect.x += SPEED * 1.2
+            if pygame.sprite.spritecollideany(self, tile_group):
+                self.rect.x -= SPEED * 1.2
+            self.run_count = (self.run_count + 1) % 7
+            if self.run_count == 6:
+                self.curr_image = (self.curr_image + 1) % len(self.run_state)
+                self.image = self.run_state[self.curr_image]
+
+        elif "left" in curr_state:
+            self.rect.x -= SPEED * 1.2
+            if pygame.sprite.spritecollideany(self, tile_group):
+                self.rect.x += SPEED * 1.2
+            self.run_count = (self.run_count + 1) % 7
+            if self.run_count == 6:
+                self.curr_image = (self.curr_image + 1) % len(self.run_state)
+                self.image = pygame.transform.flip(self.run_state[self.curr_image], True, False)
 
     def jump(self, curr_state):
         self.rect.y -= self.height_jump
@@ -445,14 +439,14 @@ class Hero(pygame.sprite.Sprite):
                 self.height_jump = 0
 
         if "right" in curr_state:
-            self.rect.x += self.speed
+            self.rect.x += SPEED
             if pygame.sprite.spritecollideany(self, tile_group):
-                self.rect.x -= self.speed
+                self.rect.x -= SPEED
 
         elif "left" in curr_state:
-            self.rect.x -= self.speed
+            self.rect.x -= SPEED
             if pygame.sprite.spritecollideany(self, tile_group):
-                self.rect.x += self.speed
+                self.rect.x += SPEED
 
         self.jump_count = (self.jump_count + 1) % 6
         if self.jump_count == 5:
