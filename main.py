@@ -101,10 +101,12 @@ def create_level(level):  # создание уровня
 
 def level_up():  # новый уровень
     global lvl
+    global BACKGROUND
     if lvl != 2:
         lvl += 1
     for sprite in all_sprites:
         sprite.kill()
+    BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
     create_level(load_level(f"lvl{lvl}.txt"))
     return
 
@@ -144,10 +146,10 @@ def lvl_completed():  # уровень пройден
     screen.blit(c_text, (WIDTH // 2 - c_text.get_width() // 2, HEIGHT // 2 - c_text.get_height() // 2))
     pressed = pygame.font.Font(None, 40)
     p_text = pressed.render('press any button', True, DARK_GREY)
-    screen.blit(p_text, (WIDTH // 2 - p_text.get_width() // 2, 440))
+    screen.blit(p_text, (WIDTH // 2 - p_text.get_width() // 2, 470))
     times = pygame.font.Font(None, 55)
     t_text = times.render(f"Time: {minutes}.{seconds}", True, BLACK)
-    screen.blit(t_text, (WIDTH // 2 - t_text.get_width() // 2, 400))
+    screen.blit(t_text, (WIDTH // 2 - t_text.get_width() // 2, 430))
 
     while True:
         for event in pygame.event.get():
@@ -194,6 +196,7 @@ def game_over():  # смерть игрока
 
 
 def finish_screen():  # конечный экран
+    main_sound.stop()
     finish_sound.play()
     finish_sound.set_volume(0.15)
     fon = pygame.transform.scale(load_image('finishscreen.png'), (WIDTH, HEIGHT))
