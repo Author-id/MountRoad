@@ -11,7 +11,7 @@ WIDTH = 21 * TILE_SIZE
 HEIGHT = 12 * TILE_SIZE
 MAX_LVL = 2
 HEIGHT_JUMP = 18
-FREE_FALL = 13
+GRAVITY = 13
 BLACK = pygame.Color('black')
 DARK_GREY = (40, 40, 40)
 
@@ -317,7 +317,6 @@ class Hero(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(hero_group, all_sprites)
         self.speed = 5
-        self.free_fall = False
         self.is_jump = False
         self.height_jump = HEIGHT_JUMP
         self.new_state = ["idle"]
@@ -397,7 +396,7 @@ class Hero(pygame.sprite.Sprite):
             self.run(curr_state)
 
         if not self.is_jump and not pygame.sprite.spritecollideany(self, tile_group):
-            self.rect.bottom += FREE_FALL
+            self.rect.bottom += GRAVITY
             if pygame.sprite.spritecollideany(self, tile_group):
                 self.rect.bottom -= self.rect.bottom % TILE_SIZE
 
