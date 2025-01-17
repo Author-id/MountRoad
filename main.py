@@ -21,6 +21,7 @@ pygame.display.set_caption("Mount Road")
 lvl = 1
 hero = None
 clock = pygame.time.Clock()
+menu_check = 0
 l_check = 0
 
 start_sound = pygame.mixer.Sound("data/sounds/start.wav")
@@ -166,7 +167,51 @@ def lvl_completed():  # уровень пройден
         pygame.display.flip()
 
 
+def menu():
+    global lvl, menu_check
+    start_sound.play()
+    start_sound.set_volume(0.15)
+    menu_check += 1
+    fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    press_font = pygame.font.Font(None, 50)
+    main_font = pygame.font.Font(None, 100)
+    menu = main_font.render('Menu', True, BLACK)
+    screen.blit(menu, ((WIDTH // 1.75) - menu.get_width(), 70))
+    lvl1_txt = press_font.render('Level 1', True, DARK_GREY)
+    screen.blit(lvl1_txt, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width(), 200))
+    lvl2_txt = press_font.render('Level 2', True, DARK_GREY)
+    screen.blit(lvl2_txt, ((WIDTH // 1.75), 200))
+    frame = pygame.transform.scale(load_image('frame.png'), (200, 200))
+    screen.blit(frame, (((WIDTH // 1.75) - menu.get_width() - 50) - lvl1_txt.get_width(), 250))
+    screen.blit(frame, ((WIDTH // 1.75) - 40, 250))
+    lvl_1 = pygame.transform.scale(load_image('lvl_1.png'), (150, 150))
+    lvl_2 = pygame.transform.scale(load_image('lvl_2.png'), (150, 150))
+    screen.blit(lvl_2, ((WIDTH // 1.75) - 17, 277))
+    screen.blit(lvl_1, (((WIDTH // 1.75) - menu.get_width() - 50 + 20) - lvl1_txt.get_width(), 277))
+    click_area_1 = pygame.Rect(((WIDTH // 1.75) - menu.get_width() - 50) - lvl1_txt.get_width(), 250, 200, 200)
+    click_area_2 = pygame.Rect((WIDTH // 1.75) - 17, 277, 200, 200)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    if click_area_1.collidepoint(event.pos):
+                        start_sound.stop()
+                        lvl = 1
+                    elif click_area_2.collidepoint(event.pos):
+                        lvl = 2
+                    if menu_check > 1:
+                        create_level(load_level(f"lvl{lvl}.txt"))
+                    return
+        clock.tick(FPS)
+        pygame.display.flip()
+
+
 def game_over():  # смерть игрока
+    global lvl
     game_over_sound.play()
     game_over_sound.set_volume(0.15)
     all_sprites.draw(screen)
@@ -184,13 +229,19 @@ def game_over():  # смерть игрока
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                for sprite in all_sprites:
-                    sprite.kill()
-                create_level(load_level(f"lvl{lvl}.txt"))
-                global time_start
-                time_start = time.time()
-                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    for sprite in all_sprites:
+                        sprite.kill()
+                    create_level(load_level(f"lvl{lvl}.txt"))
+                    global time_start
+                    time_start = time.time()
+                    return
+                elif event.key == pygame.K_2:
+                    for sprite in all_sprites:
+                        sprite.kill()
+                    menu()
+                    return
         clock.tick(FPS)
         pygame.display.flip()
 
@@ -496,6 +547,7 @@ BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH,
 camera = Camera()
 start_screen()
 if __name__ == '__main__':
+    menu()
     running = True
     create_level(load_level(f'lvl{lvl}.txt'))
     time_start = time.time()  # начало
