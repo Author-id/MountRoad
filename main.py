@@ -5,6 +5,7 @@ import time
 
 pygame.init()
 pygame.mixer.init()
+
 FPS = 60
 TILE_SIZE = 65
 WIDTH = 21 * TILE_SIZE
@@ -21,21 +22,17 @@ pygame.display.set_caption("Mount Road")
 lvl = 1
 hero = None
 clock = pygame.time.Clock()
-menu_check = 0
-l_check = 0
+menu_check = l_check = 0
 
 start_sound = pygame.mixer.Sound("data/sounds/start.wav")
 main_sound = pygame.mixer.Sound("data/sounds/main.wav")
 lvl_completed_sound = pygame.mixer.Sound("data/sounds/lvl_completed.wav")
-jump_sound = pygame.mixer.Sound("data/sounds/jump.wav")
-jump_sound.set_volume(0.15)
 game_over_sound = pygame.mixer.Sound("data/sounds/game_over.mp3")
 game_over_sound.set_volume(0.25)
 finish_sound = pygame.mixer.Sound("data/sounds/finish.wav")
 finish_sound.set_volume(0.25)
 
 sign_group = pygame.sprite.Group()
-bonfire_group = pygame.sprite.Group()
 bash_group = pygame.sprite.Group()
 tree_group = pygame.sprite.Group()
 stone_group = pygame.sprite.Group()
@@ -433,8 +430,6 @@ class Hero(pygame.sprite.Sprite):
             if 'left' in curr_state:
                 l_check = 1
             curr_state = ['death']
-
-        if curr_state == ['death']:
             self.death()
 
         if "idle" in curr_state:
