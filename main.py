@@ -169,7 +169,7 @@ def menu():
     start_sound.play()
     start_sound.set_volume(0.15)
     menu_check += 1
-    fon = pygame.transform.scale(load_image('startscreen.png'), (WIDTH, HEIGHT))
+    fon = pygame.transform.scale(load_image(f'background_{lvl}.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     press_font = pygame.font.Font(None, 50)
     main_font = pygame.font.Font(None, 100)
