@@ -193,7 +193,7 @@ def menu():
     screen.blit(lvl1_txt, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 150, 200))
     screen.blit(lvl2_txt, ((WIDTH // 1.75) + 150, 200))
     screen.blit(lvl_1, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255))
-    screen.blit(lvl_2, ((WIDTH // 1.75) - 30 , 255))
+    screen.blit(lvl_2, ((WIDTH // 1.75) - 30, 255))
     click_area_1 = pygame.Rect(((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255, 454, 366)
     click_area_2 = pygame.Rect((WIDTH // 1.75) - 30, 255, 454, 366)
     while True:
