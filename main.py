@@ -184,18 +184,18 @@ def menu():
     menu = main_font.render('Menu', True, BLACK)
     lvl1_txt = press_font.render('Level 1', True, DARK_GREY)
     lvl2_txt = press_font.render('Level 2', True, DARK_GREY)
-    lvl_1 = pygame.transform.scale(load_image('lvl_1.png'), (284, 230))
+    lvl_1 = pygame.transform.scale(load_image('lvl_1.png'), (454, 366))
     if lvl != 2:
-        lvl_2 = pygame.transform.scale(load_image("lvl_2_locked.png"), (284, 230))
+        lvl_2 = pygame.transform.scale(load_image("lvl_2_locked.png"), (454, 366))
     else:
-        lvl_2 = pygame.transform.scale(load_image('lvl_2.png'), (284, 230))
+        lvl_2 = pygame.transform.scale(load_image('lvl_2.png'), (454, 366))
     screen.blit(menu, ((WIDTH // 1.75) - menu.get_width(), 70))
-    screen.blit(lvl1_txt, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 100, 200))
-    screen.blit(lvl2_txt, ((WIDTH // 1.75) + 100, 200))
-    screen.blit(lvl_1, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 190, 255))
-    screen.blit(lvl_2, ((WIDTH // 1.75) + 20, 255))
-    click_area_1 = pygame.Rect(((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 190, 255, 284, 230)
-    click_area_2 = pygame.Rect((WIDTH // 1.75) + 20, 255, 284, 230)
+    screen.blit(lvl1_txt, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 150, 200))
+    screen.blit(lvl2_txt, ((WIDTH // 1.75) + 150, 200))
+    screen.blit(lvl_1, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255))
+    screen.blit(lvl_2, ((WIDTH // 1.75) - 30 , 255))
+    click_area_1 = pygame.Rect(((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255, 454, 366)
+    click_area_2 = pygame.Rect((WIDTH // 1.75) - 30, 255, 454, 366)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
