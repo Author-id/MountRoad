@@ -22,7 +22,7 @@ pygame.display.set_caption("Mount Road")
 lvl = 1
 hero = None
 clock = pygame.time.Clock()
-menu_check = l_check = 0
+l_check = 0
 
 start_sound = pygame.mixer.Sound("data/sounds/start.wav")
 main_sound = pygame.mixer.Sound("data/sounds/main.wav")
@@ -102,10 +102,6 @@ def level_up():  # новый уровень
     global BACKGROUND
     if lvl != 2:
         lvl += 1
-    for sprite in all_sprites:
-        sprite.kill()
-    BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
-    create_level(load_level(f"lvl{lvl}.txt"))
     return
 
 
@@ -141,67 +137,78 @@ def lvl_completed():  # уровень пройден
     all_sprites.draw(screen)
     completed = pygame.font.Font(None, 100)
     c_text = completed.render(f'Level {lvl} completed', True, BLACK)
-    screen.blit(c_text, (WIDTH // 2 - c_text.get_width() // 2, HEIGHT // 2 - c_text.get_height() // 2))
+    screen.blit(c_text, (WIDTH // 2 - c_text.get_width() // 2, 150))
     pressed = pygame.font.Font(None, 40)
-    p_text = pressed.render('press any button', True, DARK_GREY)
-    screen.blit(p_text, (WIDTH // 2 - p_text.get_width() // 2, 470))
+    p1_text = pressed.render('press 1 - to go to next level', True, DARK_GREY)
+    p2_text = pressed.render('press 2 - to go to menu', True, DARK_GREY)
+    screen.blit(p1_text, (WIDTH // 2 - p1_text.get_width() // 2, 280))
+    screen.blit(p2_text, (WIDTH // 2 - p2_text.get_width() // 2, 330))
     times = pygame.font.Font(None, 55)
     t_text = times.render(f"Time: {minutes}.{seconds}", True, BLACK)
-    screen.blit(t_text, (WIDTH // 2 - t_text.get_width() // 2, 430))
-
+    screen.blit(t_text, (WIDTH // 2 - t_text.get_width() // 2, 230))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.KEYDOWN:
                 if lvl == MAX_LVL:
                     finish_screen()
-                global time_start
-                time_start = time.time()
-                return
+                    return
+                else:
+                    for sprite in all_sprites:
+                        sprite.kill()
+                    level_up()
+                    if event.key == pygame.K_1:
+                        create_level(load_level(f"lvl{lvl}.txt"))
+                        global time_start
+                        time_start = time.time()
+                        return
+                    elif event.key == pygame.K_2:
+                        menu()
+                        return
         clock.tick(FPS)
         pygame.display.flip()
 
 
 def menu():
-    global lvl, menu_check
+    global lvl
+    start_sound.stop()
     start_sound.play()
     start_sound.set_volume(0.15)
-    menu_check += 1
     fon = pygame.transform.scale(load_image(f'background_{lvl}.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     press_font = pygame.font.Font(None, 50)
     main_font = pygame.font.Font(None, 100)
     menu = main_font.render('Menu', True, BLACK)
-    screen.blit(menu, ((WIDTH // 1.75) - menu.get_width(), 70))
     lvl1_txt = press_font.render('Level 1', True, DARK_GREY)
-    screen.blit(lvl1_txt, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width(), 200))
     lvl2_txt = press_font.render('Level 2', True, DARK_GREY)
-    screen.blit(lvl2_txt, ((WIDTH // 1.75), 200))
-    frame = pygame.transform.scale(load_image('frame.png'), (200, 200))
-    screen.blit(frame, (((WIDTH // 1.75) - menu.get_width() - 50) - lvl1_txt.get_width(), 250))
-    screen.blit(frame, ((WIDTH // 1.75) - 40, 250))
-    lvl_1 = pygame.transform.scale(load_image('lvl_1.png'), (150, 150))
-    lvl_2 = pygame.transform.scale(load_image('lvl_2.png'), (150, 150))
-    screen.blit(lvl_2, ((WIDTH // 1.75) - 17, 277))
-    screen.blit(lvl_1, (((WIDTH // 1.75) - menu.get_width() - 50 + 20) - lvl1_txt.get_width(), 277))
-    click_area_1 = pygame.Rect(((WIDTH // 1.75) - menu.get_width() - 50) - lvl1_txt.get_width(), 250, 200, 200)
-    click_area_2 = pygame.Rect((WIDTH // 1.75) - 17, 277, 200, 200)
+    lvl_1 = pygame.transform.scale(load_image('lvl_1.png'), (454, 366))
+    if lvl != 2:
+        lvl_2 = pygame.transform.scale(load_image("lvl_2_locked.png"), (454, 366))
+    else:
+        lvl_2 = pygame.transform.scale(load_image('lvl_2.png'), (454, 366))
+    screen.blit(menu, ((WIDTH // 1.75) - menu.get_width(), 95))
+    screen.blit(lvl1_txt, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 150, 200))
+    screen.blit(lvl2_txt, ((WIDTH // 1.75) + 150, 200))
+    screen.blit(lvl_1, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255))
+    screen.blit(lvl_2, ((WIDTH // 1.75) - 30, 255))
+    click_area_1 = pygame.Rect(((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255, 454, 366)
+    click_area_2 = pygame.Rect((WIDTH // 1.75) - 30, 255, 454, 366)
+    click_area = [click_area_2, click_area_1]
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    if click_area_1.collidepoint(event.pos):
-                        start_sound.stop()
-                        lvl = 1
-                    elif click_area_2.collidepoint(event.pos):
-                        lvl = 2
-                    if menu_check > 1:
-                        create_level(load_level(f"lvl{lvl}.txt"))
+                if click_area_1.collidepoint(event.pos):
+                    start_sound.stop()
+                    create_level(load_level(f"lvl{1}.txt"))
+                    return
+                elif click_area_2.collidepoint(event.pos) and lvl == 2:
+                    start_sound.stop()
+                    create_level(load_level(f"lvl{2}.txt"))
                     return
         clock.tick(FPS)
         pygame.display.flip()
@@ -412,7 +419,6 @@ class Hero(pygame.sprite.Sprite):
         if self.on_finish():
             self.kill()
             lvl_completed()
-            level_up()
 
         self.rect.bottom += 1
         curr_state = self.get_state(buttons)
@@ -544,7 +550,6 @@ start_screen()
 if __name__ == '__main__':
     menu()
     running = True
-    create_level(load_level(f'lvl{lvl}.txt'))
     time_start = time.time()  # начало
     while running:
         keys = {"space": False}
