@@ -195,7 +195,6 @@ def menu():
     screen.blit(lvl_2, ((WIDTH // 1.75) - 30, 255))
     click_area_1 = pygame.Rect(((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255, 454, 366)
     click_area_2 = pygame.Rect((WIDTH // 1.75) - 30, 255, 454, 366)
-    click_area = [click_area_2, click_area_1]
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
