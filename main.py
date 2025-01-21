@@ -155,26 +155,25 @@ def lvl_completed():  # уровень пройден
                 if lvl == MAX_LVL:
                     finish_screen()
                     return
-                elif event.key == pygame.K_1:
+                else:
                     for sprite in all_sprites:
                         sprite.kill()
                     level_up()
-                    create_level(load_level(f"lvl{lvl}.txt"))
-                    global time_start
-                    time_start = time.time()
-                    return
-                elif event.key == pygame.K_2:
-                    level_up()
-                    for sprite in all_sprites:
-                        sprite.kill()
-                    menu()
-                    return
+                    if event.key == pygame.K_1:
+                        create_level(load_level(f"lvl{lvl}.txt"))
+                        global time_start
+                        time_start = time.time()
+                        return
+                    elif event.key == pygame.K_2:
+                        menu()
+                        return
         clock.tick(FPS)
         pygame.display.flip()
 
 
 def menu():
     global lvl
+    start_sound.stop()
     start_sound.play()
     start_sound.set_volume(0.15)
     fon = pygame.transform.scale(load_image(f'background_{lvl}.png'), (WIDTH, HEIGHT))
@@ -189,28 +188,28 @@ def menu():
         lvl_2 = pygame.transform.scale(load_image("lvl_2_locked.png"), (454, 366))
     else:
         lvl_2 = pygame.transform.scale(load_image('lvl_2.png'), (454, 366))
-    screen.blit(menu, ((WIDTH // 1.75) - menu.get_width(), 70))
+    screen.blit(menu, ((WIDTH // 1.75) - menu.get_width(), 95))
     screen.blit(lvl1_txt, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 150, 200))
     screen.blit(lvl2_txt, ((WIDTH // 1.75) + 150, 200))
     screen.blit(lvl_1, (((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255))
     screen.blit(lvl_2, ((WIDTH // 1.75) - 30, 255))
     click_area_1 = pygame.Rect(((WIDTH // 1.75) - menu.get_width()) - lvl1_txt.get_width() - 330, 255, 454, 366)
     click_area_2 = pygame.Rect((WIDTH // 1.75) - 30, 255, 454, 366)
+    click_area = [click_area_2, click_area_1]
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    if click_area_1.collidepoint(event.pos):
-                        start_sound.stop()
-                        create_level(load_level(f"lvl{1}.txt"))
-                        return
-                    elif click_area_2.collidepoint(event.pos) and lvl == 2:
-                        start_sound.stop()
-                        create_level(load_level(f"lvl{2}.txt"))
-                        return
+                if click_area_1.collidepoint(event.pos):
+                    start_sound.stop()
+                    create_level(load_level(f"lvl{1}.txt"))
+                    return
+                elif click_area_2.collidepoint(event.pos) and lvl == 2:
+                    start_sound.stop()
+                    create_level(load_level(f"lvl{2}.txt"))
+                    return
         clock.tick(FPS)
         pygame.display.flip()
 
