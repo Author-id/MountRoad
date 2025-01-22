@@ -124,14 +124,13 @@ def start_screen():  # начальный экран
                 sys.exit()
             if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                 start_sound.stop()
-                main_sound.play(-1)
-                main_sound.set_volume(0.25)
                 return
         clock.tick(FPS)
         pygame.display.flip()
 
 
 def lvl_completed():  # уровень пройден
+    main_sound.stop()
     lvl_completed_sound.play()
     lvl_completed_sound.set_volume(0.15)
     all_sprites.draw(screen)
@@ -173,9 +172,9 @@ def lvl_completed():  # уровень пройден
 
 def menu():
     global lvl
-    start_sound.stop()
+    main_sound.stop()
     start_sound.play()
-    start_sound.set_volume(0.15)
+    start_sound.set_volume(0.3)
     fon = pygame.transform.scale(load_image(f'background_{lvl}.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     press_font = pygame.font.Font(None, 50)
@@ -203,10 +202,14 @@ def menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if click_area_1.collidepoint(event.pos):
                     start_sound.stop()
+                    main_sound.play(-1)
+                    main_sound.set_volume(0.25)
                     create_level(load_level(f"lvl{1}.txt"))
                     return
                 elif click_area_2.collidepoint(event.pos) and lvl == 2:
                     start_sound.stop()
+                    main_sound.play(-1)
+                    main_sound.set_volume(0.25)
                     create_level(load_level(f"lvl{2}.txt"))
                     return
         clock.tick(FPS)
