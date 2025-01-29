@@ -157,13 +157,14 @@ def lvl_completed():  # уровень пройден
                 else:
                     for sprite in all_sprites:
                         sprite.kill()
-                    level_up()
                     if event.key == pygame.K_1:
+                        level_up()
                         create_level(load_level(f"lvl{lvl}.txt"))
                         global time_start
                         time_start = time.time()
                         return
                     elif event.key == pygame.K_2:
+                        level_up()
                         menu()
                         return
         clock.tick(FPS)
@@ -526,7 +527,7 @@ class Hero(pygame.sprite.Sprite):
         curr_mask = pygame.mask.from_surface(sprite.image)
         for item in sprite_group:
             sprite_mask = pygame.mask.from_surface(item.image)
-            offset = (item.rect.x - sprite.rect.x + 1, item.rect.y - sprite.rect.y - 1)
+            offset = (item.rect.x - sprite.rect.x + 1, item.rect.y - sprite.rect.y - 2)
             if curr_mask.overlap(sprite_mask, offset):
                 return True
         return False
@@ -537,12 +538,12 @@ class Hero(pygame.sprite.Sprite):
         return False
 
     def on_spikes(self):
-        if self.collide_mask_check(self, spike_group):
+        if self.collide_mask_check(self, spike_group) and self.collide_mask_check(self, tile_group):
             return True
         return False
 
     def on_finish(self):
-        if self.collide_mask_check(self, flag_group):
+        if self.collide_mask_check(self, flag_group) and self.collide_mask_check(self, tile_group):
             return True
         return False
 
