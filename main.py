@@ -205,8 +205,7 @@ def menu():
                     start_sound.stop()
                     main_sound.play(-1)
                     main_sound.set_volume(0.25)
-                    lvl = 1
-                    create_level(load_level(f"lvl{lvl}.txt"))
+                    create_level(load_level(f"lvl{1}.txt"))
                     return
                 elif click_area_2.collidepoint(event.pos) and lvl == 2:
                     start_sound.stop()
