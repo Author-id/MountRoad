@@ -416,6 +416,7 @@ class Hero(pygame.sprite.Sprite):
         return states
 
     def update(self, buttons):
+
         if not self.on_screen():
             self.kill()
             game_over()
@@ -434,8 +435,9 @@ class Hero(pygame.sprite.Sprite):
             self.curr_image = 0
             self.new_state = curr_state
 
+        global l_check
+
         if self.on_spikes():
-            global l_check
             if 'left' in curr_state:
                 l_check = 1
             curr_state = ['death']
@@ -525,8 +527,9 @@ class Hero(pygame.sprite.Sprite):
     def collide_mask_check(self, sprite, sprite_group):
         curr_mask = pygame.mask.from_surface(sprite.image)
         for item in sprite_group:
-            sprite_mask = pygame.mask.from_surface(item.image)
-            offset = (item.rect.x - sprite.rect.x + 1, item.rect.y - sprite.rect.y - 2)
+            less_image = pygame.transform.scale(item.image, (TILE_SIZE, TILE_SIZE*0.5))
+            sprite_mask = pygame.mask.from_surface(less_image)
+            offset = (item.rect.x - sprite.rect.x + 1, item.rect.y - sprite.rect.y+40)
             if curr_mask.overlap(sprite_mask, offset):
                 return True
         return False
@@ -537,12 +540,12 @@ class Hero(pygame.sprite.Sprite):
         return False
 
     def on_spikes(self):
-        if self.collide_mask_check(self, spike_group) and self.collide_mask_check(self, tile_group):
+        if self.collide_mask_check(self, spike_group):
             return True
         return False
 
     def on_finish(self):
-        if self.collide_mask_check(self, flag_group) and self.collide_mask_check(self, tile_group):
+        if self.collide_mask_check(self, flag_group):
             return True
         return False
 
