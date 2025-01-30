@@ -23,6 +23,7 @@ lvl = 1
 hero = None
 clock = pygame.time.Clock()
 l_check = 0
+d_state = 0
 
 start_sound = pygame.mixer.Sound("data/sounds/start.wav")
 main_sound = pygame.mixer.Sound("data/sounds/main.wav")
@@ -416,6 +417,7 @@ class Hero(pygame.sprite.Sprite):
         return states
 
     def update(self, buttons):
+        global d_state
         if not self.on_screen():
             self.kill()
             game_over()
@@ -434,12 +436,13 @@ class Hero(pygame.sprite.Sprite):
             self.curr_image = 0
             self.new_state = curr_state
 
-        if self.on_spikes():
+        if self.on_spikes() or d_state == 1:
             global l_check
             if 'left' in curr_state:
                 l_check = 1
             curr_state = ['death']
             self.death()
+            d_state = 0
 
         if "idle" in curr_state:
             self.idle(curr_state)
@@ -537,7 +540,9 @@ class Hero(pygame.sprite.Sprite):
         return False
 
     def on_spikes(self):
+        global d_state
         if self.collide_mask_check(self, spike_group) and self.collide_mask_check(self, tile_group):
+            d_state = 1
             return True
         return False
 
