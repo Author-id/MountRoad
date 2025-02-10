@@ -173,6 +173,7 @@ def lvl_completed():  # уровень пройден
 
 def menu():
     global lvl
+    global time_start
     main_sound.stop()
     start_sound.play()
     start_sound.set_volume(0.3)
@@ -206,12 +207,14 @@ def menu():
                     main_sound.play(-1)
                     main_sound.set_volume(0.25)
                     create_level(load_level(f"lvl{1}.txt"))
+                    time_start = time.time()
                     return
                 elif click_area_2.collidepoint(event.pos) and lvl == 2:
                     start_sound.stop()
                     main_sound.play(-1)
                     main_sound.set_volume(0.25)
-                    create_level(load_level(f"lvl{lvl}.txt"))
+                    create_level(load_level(f"lvl{2}.txt"))
+                    time_start = time.time()
                     return
         clock.tick(FPS)
         pygame.display.flip()
@@ -527,9 +530,9 @@ class Hero(pygame.sprite.Sprite):
     def collide_mask_check(self, sprite, sprite_group):
         curr_mask = pygame.mask.from_surface(sprite.image)
         for item in sprite_group:
-            less_image = pygame.transform.scale(item.image, (TILE_SIZE, TILE_SIZE*0.5))
+            less_image = pygame.transform.scale(item.image, (TILE_SIZE, TILE_SIZE * 0.5))
             sprite_mask = pygame.mask.from_surface(less_image)
-            offset = (item.rect.x - sprite.rect.x + 1, item.rect.y - sprite.rect.y+40)
+            offset = (item.rect.x - sprite.rect.x + 1, item.rect.y - sprite.rect.y + 40)
             if curr_mask.overlap(sprite_mask, offset):
                 return True
         return False
