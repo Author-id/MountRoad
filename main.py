@@ -160,6 +160,8 @@ def lvl_completed():  # уровень пройден
                     if event.key == pygame.K_1:
                         level_up()
                         create_level(load_level(f"lvl{lvl}.txt"))
+                        main_sound.play()
+                        main_sound.set_volume(0.5)
                         global time_start
                         time_start = time.time()
                         return
