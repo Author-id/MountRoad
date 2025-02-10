@@ -100,8 +100,9 @@ def create_level(level):  # создание уровня
 def level_up():  # новый уровень
     global lvl
     global BACKGROUND
-    if lvl != 2:
+    if lvl != MAX_LVL:
         lvl += 1
+    BACKGROUND = pygame.transform.scale(load_image(f"background_{lvl}.png"), (WIDTH, HEIGHT))
     return
 
 
